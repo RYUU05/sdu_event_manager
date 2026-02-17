@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "709340410111",
+    "project_id": "sdu-event-manager",
+    "storage_bucket": "sdu-event-manager.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:709340410111:android:8a9c7d81dd2d335cc95cca",
+        "android_client_info": {
+          "package_name": "com.example.event_manager"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFZOUBS_n1vF_PGoWaekDcsm51FjCuN44"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
