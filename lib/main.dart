@@ -44,9 +44,9 @@ class _HomeScreenState extends State<HomeScreen> {
             case ConnectionState.done:
               final user = FirebaseAuth.instance.currentUser;
               if (user?.emailVerified ?? false) {
-                debugPrint("You're verified");
+                debugPrint("You're verified!");
               } else {
-                debugPrint("You're not verified");
+                debugPrint("You're not verified!");
               }
               return const Text('Done');
             default:
