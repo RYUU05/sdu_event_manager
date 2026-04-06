@@ -1,16 +1,19 @@
+import 'package:auto_route/auto_route.dart';
+import 'package:event_manager/core/router/app_router.gr.dart';
 import 'package:event_manager/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+@RoutePage()
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginPageState extends State<LoginPage> {
   late final TextEditingController _email;
   late final TextEditingController _pass;
 
@@ -102,6 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 password: pass,
                               );
                           debugPrint(userCredential.toString());
+                          context.router.replace(const HomeRoute());
                         } on FirebaseAuthException catch (e) {
                           if (e.code == 'user-not-found') {
                             debugPrint('User not found');
@@ -129,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Text("Don't have an account?"),
                         TextButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, '/register');
+                            context.router.push(const RegisterRoute());
                           },
                           child: Text('Sign up'),
                         ),

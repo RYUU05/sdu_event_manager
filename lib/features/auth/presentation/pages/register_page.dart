@@ -1,16 +1,19 @@
+import 'package:auto_route/auto_route.dart';
+import 'package:event_manager/core/router/app_router.gr.dart';
 import 'package:event_manager/firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+@RoutePage()
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _RegisterPageState extends State<RegisterPage> {
   late final TextEditingController _email;
   late final TextEditingController _pass;
 
@@ -101,6 +104,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 password: pass,
                               );
                           debugPrint(userCreadential.toString());
+                          context.router.push(const LoginRoute());
                         } on FirebaseAuthException catch (e) {
                           if (e.code == 'weak-password') {
                             debugPrint('Weak password');
@@ -120,6 +124,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                       child: Text('Sign up', style: TextStyle(fontSize: 20)),
+                    ),
+                    Spacer(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Already have an account?"),
+                        TextButton(
+                          onPressed: () {
+                            context.router.push(const LoginRoute());
+                          },
+                          child: Text('Log in'),
+                        ),
+                      ],
                     ),
                   ],
                 ),
