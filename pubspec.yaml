@@ -7,9 +7,10 @@ environment:
   sdk: ^3.9.2
 
 dependencies:
-  flutter:
+  flutter_localizations:
     sdk: flutter
 
+  intl: ^0.20.2
   cupertino_icons: ^1.0.8
   firebase_auth:
   firebase_core:
@@ -37,9 +38,11 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
 
   assets:
     - assets/
+    - l10n/
 
 flutter_native_splash:
   image: assets/sdu_logo.png

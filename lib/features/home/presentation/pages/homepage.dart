@@ -1,3 +1,4 @@
+import 'package:event_manager/core/extensions/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -53,7 +54,7 @@ class _HomePageState extends State<HomePage> {
       create: (context) => homeBloc,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Главная'),
+          title: Text(context.localization.appTitle),
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           elevation: 0,
         ),
@@ -112,7 +113,7 @@ class _HomePageState extends State<HomePage> {
                           Padding(
                             padding: const EdgeInsets.all(16),
                             child: Text(
-                              'Ближайшие мероприятия',
+                              context.localization.comingEvents,
                               style: Theme.of(context).textTheme.titleLarge
                                   ?.copyWith(fontWeight: FontWeight.bold),
                             ),
@@ -129,12 +130,7 @@ class _HomePageState extends State<HomePage> {
                                 final event = events[index];
                                 return SizedBox(
                                   width: 350,
-                                  child: EventCard(
-                                    event: event,
-                                    onTap: () {
-                                      // TODO: Navigate to event details
-                                    },
-                                  ),
+                                  child: EventCard(event: event, onTap: () {}),
                                 );
                               },
                             ),
@@ -145,7 +141,7 @@ class _HomePageState extends State<HomePage> {
                           Padding(
                             padding: const EdgeInsets.all(16),
                             child: Text(
-                              'Популярные клубы',
+                              context.localization.popularClubs,
                               style: Theme.of(context).textTheme.titleLarge
                                   ?.copyWith(fontWeight: FontWeight.bold),
                             ),
@@ -157,12 +153,7 @@ class _HomePageState extends State<HomePage> {
                               itemCount: clubs.length,
                               itemBuilder: (context, index) {
                                 final club = clubs[index];
-                                return ClubCard(
-                                  club: club,
-                                  onTap: () {
-                                    // TODO: Navigate to club details
-                                  },
-                                );
+                                return ClubCard(club: club, onTap: () {});
                               },
                             ),
                           ),
