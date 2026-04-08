@@ -106,7 +106,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         if (e.id == event.eventId) {
           return e.copyWith(
             isRegistered: true,
-            currentParticipants: (e.currentParticipants ?? 0) + 1,
+            currentParticipants: (e.currentParticipants) + 1,
           );
         }
         return e;
@@ -138,7 +138,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         if (e.id == event.eventId) {
           return e.copyWith(
             isRegistered: false,
-            currentParticipants: (e.currentParticipants ?? 1) - 1,
+            currentParticipants: (e.currentParticipants) - 1,
           );
         }
         return e;
@@ -165,10 +165,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
       final updatedClubs = currentState.popularClubs.map((c) {
         if (c.id == event.clubId) {
-          return c.copyWith(
-            isFollowed: true,
-            memberCount: (c.memberCount ?? 0) + 1,
-          );
+          return c.copyWith(isFollowed: true, memberCount: (c.memberCount) + 1);
         }
         return c;
       }).toList();
@@ -199,7 +196,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         if (c.id == event.clubId) {
           return c.copyWith(
             isFollowed: false,
-            memberCount: (c.memberCount ?? 1) - 1,
+            memberCount: (c.memberCount) - 1,
           );
         }
         return c;
