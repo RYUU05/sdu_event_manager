@@ -1,7 +1,7 @@
 import 'package:event_manager/core/router/app_router.dart';
+import 'package:event_manager/firebase_options.dart';
 import 'package:event_manager/l10n/app_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:event_manager/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
@@ -13,7 +13,6 @@ Future<void> main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  await Future.delayed(const Duration(seconds: 2));
   FlutterNativeSplash.remove();
 
   runApp(const MyApp());
