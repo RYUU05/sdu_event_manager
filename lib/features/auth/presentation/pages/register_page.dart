@@ -85,7 +85,6 @@ class _RegisterPageState extends State<RegisterPage> {
               onPressed: () async {
                 final email = _email.text;
                 final pass = _pass.text;
-                final router = context.router;
                 try {
                   final userCreadential = await FirebaseAuth.instance
                       .createUserWithEmailAndPassword(
@@ -94,7 +93,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       );
                   debugPrint(userCreadential.toString());
                   if (!mounted) return;
-                  router.push(const LoginRoute());
+                  context.router.push(const LoginRoute());
                 } on FirebaseAuthException catch (e) {
                   if (e.code == 'weak-password') {
                     debugPrint('Weak password');
@@ -122,7 +121,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 Text("Already have an account?"),
                 TextButton(
                   onPressed: () {
-                    context.router.replace(const LoginRoute());
+                    context.router.push(const LoginRoute());
                   },
                   child: Text('Log in'),
                 ),

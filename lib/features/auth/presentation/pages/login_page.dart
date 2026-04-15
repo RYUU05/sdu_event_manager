@@ -86,13 +86,12 @@ class _LoginPageState extends State<LoginPage> {
               onPressed: () async {
                 final email = _email.text;
                 final pass = _pass.text;
-                final router = context.router;
                 try {
                   final userCredential = await FirebaseAuth.instance
                       .signInWithEmailAndPassword(email: email, password: pass);
                   debugPrint(userCredential.toString());
                   if (!mounted) return;
-                  router.replace(const AppShellRoute());
+                  context.router.replace(const HomeRoute());
                 } on FirebaseAuthException catch (e) {
                   if (e.code == 'user-not-found') {
                     debugPrint('User not found');
@@ -120,7 +119,7 @@ class _LoginPageState extends State<LoginPage> {
                 Text("Don't have an account?"),
                 TextButton(
                   onPressed: () {
-                    context.router.replace(const RegisterRoute());
+                    context.router.push(const RegisterRoute());
                   },
                   child: Text('Sign up'),
                 ),
