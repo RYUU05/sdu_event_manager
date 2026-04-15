@@ -13,8 +13,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   Future<SettingsEntity> getSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    final language = prefs.getString('language') ?? 'en';
+    final language = await dataSource.getLang();
     return SettingsEntity(language: language);
   }
 

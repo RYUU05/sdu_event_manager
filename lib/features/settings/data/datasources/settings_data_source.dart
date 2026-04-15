@@ -10,4 +10,9 @@ class SettingsDataSource {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('language', code);
   }
+
+  Future<String> getLang() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('language') ?? 'en';
+  }
 }
