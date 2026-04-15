@@ -16,7 +16,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     Emitter<SettingsState> emit,
   ) async {
     emit(SettingsLoading());
-    try {} catch (e) {
+    try {
+      final settings = await repository.getSettings();
+      emit(SettingsLoaded(settings.language));
+    } catch (e) {
       emit(SettingsError('Failed to load settings'));
     }
   }
@@ -25,14 +28,19 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     LanguageEvent event,
     Emitter<SettingsState> emit,
   ) async {
-    try {} catch (e) {
+    try {
+      await repository.changeLang(event.languageCode);
+      emit(SettingsLoaded(event.languageCode));
+    } catch (e) {
       emit(SettingsError('Failed to change lang'));
     }
   }
-}
 
-Future<void> _onLogout(LogoutEvent event, Emitter<SettingsState> emit) async {
-  try {} catch (e) {
-    emit(SettingsError('Failed to logout'));
+  Future<void> _onLogout(LogoutEvent event, Emitter<SettingsState> emit) async {
+    try {
+      await repository.logout();
+    } catch (e) {
+      emit(SettingsError('Failed to logout'));
+    }
   }
 }
