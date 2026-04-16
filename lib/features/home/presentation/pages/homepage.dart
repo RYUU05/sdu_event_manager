@@ -1,4 +1,7 @@
 import 'package:event_manager/core/extensions/context_extensions.dart';
+import 'package:event_manager/core/router/app_router.gr.dart';
+import 'package:event_manager/features/auth/presentation/bloc/auth_bloc_simple.dart';
+import 'package:event_manager/features/auth/domain/entities/user_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -47,6 +50,21 @@ class _HomePageState extends State<HomePage> {
           title: Text(context.localization.appTitle),
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           elevation: 0,
+        ),
+        floatingActionButton: BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, authState) {
+            if (authState is Authenticated &&
+                authState.user.role == UserRole.club) {
+              return FloatingActionButton.extended(
+                onPressed: () {
+                  context.router.push(const CreateEventRoute());
+                },
+                icon: const Icon(Icons.add),
+                label: const Text('Создать ивент'),
+              );
+            }
+            return const SizedBox.shrink();
+          },
         ),
         body: BlocListener<HomeBloc, HomeState>(
           listener: (context, state) {

@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:event_manager/core/router/app_router.gr.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -81,38 +82,92 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
             SizedBox(height: 50),
-            ElevatedButton(
+            // Register as Student
+            ElevatedButton.icon(
               onPressed: () async {
                 final email = _email.text;
                 final pass = _pass.text;
                 try {
-                  final userCreadential = await FirebaseAuth.instance
+                  final userCredential = await FirebaseAuth.instance
                       .createUserWithEmailAndPassword(
                         email: email,
                         password: pass,
                       );
-                  debugPrint(userCreadential.toString());
-                  if (!mounted) return;
-                  context.router.push(const LoginRoute());
-                } on FirebaseAuthException catch (e) {
-                  if (e.code == 'weak-password') {
-                    debugPrint('Weak password');
-                  } else if (e.code == 'email-already-in-use') {
-                    debugPrint('Email already in use');
-                  } else if (e.code == 'invalid-email') {
-                    debugPrint('Invalid email');
+                  // Save user role to Firestore
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userCredential.user!.uid)
+                      .set({
+                        'email': email,
+                        'role': 'student',
+                        'createdAt': FieldValue.serverTimestamp(),
+                      });
+                  debugPrint(
+                    'Student registered: ${userCredential.user?.email}',
+                  );
+                  if (mounted) {
+                    context.router.push(const LoginRoute());
                   }
+                } on FirebaseAuthException catch (e) {
+                  if (mounted) _handleAuthError(e);
                 }
               },
+              icon: const Icon(Icons.school),
+              label: const Text(
+                'Register as Student',
+                style: TextStyle(fontSize: 18),
+              ),
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
                 backgroundColor: Colors.blueAccent,
-                minimumSize: Size(double.infinity, 60),
+                minimumSize: const Size(double.infinity, 55),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: Text('Sign up', style: TextStyle(fontSize: 20)),
+            ),
+            const SizedBox(height: 12),
+            // Register as Club
+            ElevatedButton.icon(
+              onPressed: () async {
+                final email = _email.text;
+                final pass = _pass.text;
+                try {
+                  final userCredential = await FirebaseAuth.instance
+                      .createUserWithEmailAndPassword(
+                        email: email,
+                        password: pass,
+                      );
+                  // Save user role to Firestore
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userCredential.user!.uid)
+                      .set({
+                        'email': email,
+                        'role': 'club',
+                        'createdAt': FieldValue.serverTimestamp(),
+                      });
+                  debugPrint('Club registered: ${userCredential.user?.email}');
+                  if (mounted) {
+                    context.router.push(const LoginRoute());
+                  }
+                } on FirebaseAuthException catch (e) {
+                  if (mounted) _handleAuthError(e);
+                }
+              },
+              icon: const Icon(Icons.corporate_fare),
+              label: const Text(
+                'Register as Club',
+                style: TextStyle(fontSize: 18),
+              ),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.purple,
+                minimumSize: const Size(double.infinity, 55),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
             ),
             Spacer(),
             Row(
@@ -130,6 +185,22 @@ class _RegisterPageState extends State<RegisterPage> {
           ],
         ),
       ),
+    );
+  }
+
+  void _handleAuthError(FirebaseAuthException e) {
+    if (!mounted) return;
+    String message = 'Registration failed';
+    if (e.code == 'weak-password') {
+      message = 'Password is too weak';
+    } else if (e.code == 'email-already-in-use') {
+      message = 'Email already in use';
+    } else if (e.code == 'invalid-email') {
+      message = 'Invalid email format';
+    }
+    debugPrint(message);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 }

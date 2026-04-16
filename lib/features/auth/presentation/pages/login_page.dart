@@ -1,7 +1,11 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:event_manager/core/router/app_router.gr.dart';
+import 'package:event_manager/features/auth/domain/entities/user_entity.dart';
+import 'package:event_manager/features/auth/presentation/bloc/auth_bloc_simple.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 @RoutePage()
 class LoginPage extends StatefulWidget {
@@ -90,8 +94,29 @@ class _LoginPageState extends State<LoginPage> {
                   final userCredential = await FirebaseAuth.instance
                       .signInWithEmailAndPassword(email: email, password: pass);
                   debugPrint(userCredential.toString());
-                  if (!mounted) return;
-                  context.router.replace(const HomeRoute());
+
+                  // Load user role from Firestore
+                  final userDoc = await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userCredential.user!.uid)
+                      .get();
+
+                  final roleString = userDoc.data()?['role'] ?? 'student';
+                  final role = roleString == 'club'
+                      ? UserRole.club
+                      : UserRole.student;
+
+                  // Update AuthBloc with user and role
+                  if (mounted) {
+                    final user = UserEntity(
+                      id: userCredential.user!.uid,
+                      email: email,
+                      name: userDoc.data()?['name'] ?? email,
+                      role: role,
+                    );
+                    context.read<AuthBloc>().add(UserChanged(user));
+                    context.router.replace(const HomeRoute());
+                  }
                 } on FirebaseAuthException catch (e) {
                   if (e.code == 'user-not-found') {
                     debugPrint('User not found');
@@ -125,6 +150,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ],
             ),
+            const SizedBox(height: 8),
           ],
         ),
       ),
