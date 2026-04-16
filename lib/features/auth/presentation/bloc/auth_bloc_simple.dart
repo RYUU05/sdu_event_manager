@@ -1,153 +1,112 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:dartz/dartz.dart';
 import 'package:event_manager/features/auth/domain/entities/user_entity.dart';
 import 'package:event_manager/features/auth/domain/repositories/auth_repository.dart';
 
 /// Authentication events
-abstract class AuthEvent {
-  const AuthEvent();
-}
+abstract class AuthEvent {}
 
 class LoginRequested extends AuthEvent {
   final String email;
   final String password;
-
-  const LoginRequested({required this.email, required this.password});
+  LoginRequested(this.email, this.password);
 }
 
 class RegisterRequested extends AuthEvent {
   final String email;
   final String password;
   final String name;
-
-  const RegisterRequested({
-    required this.email,
-    required this.password,
-    required this.name,
-  });
+  final UserRole role;
+  RegisterRequested(this.email, this.password, this.name, this.role);
 }
 
-class LogoutRequested extends AuthEvent {
-  const LogoutRequested();
-}
+class LogoutRequested extends AuthEvent {}
 
 class UserChanged extends AuthEvent {
-  final UserEntity user;
-
-  const UserChanged(this.user);
-}
-
-class GetCurrentUserRequested extends AuthEvent {
-  const GetCurrentUserRequested();
+  final UserEntity? user;
+  UserChanged(this.user);
 }
 
 /// Authentication states
-abstract class AuthState {
-  const AuthState();
-}
+abstract class AuthState {}
 
-class Initial extends AuthState {
-  const Initial();
-}
+class AuthInitial extends AuthState {}
 
-class Loading extends AuthState {
-  const Loading();
-}
+class AuthLoading extends AuthState {}
 
 class Authenticated extends AuthState {
   final UserEntity user;
-
-  const Authenticated(this.user);
+  Authenticated(this.user);
 }
 
-class Unauthenticated extends AuthState {
-  const Unauthenticated();
-}
+class Unauthenticated extends AuthState {}
 
-class Failure extends AuthState {
-  final String error;
-
-  const Failure(this.error);
+class AuthError extends AuthState {
+  final String message;
+  AuthError(this.message);
 }
 
 /// Authentication BLoC with role-based access control
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final AuthRepository _authRepository;
+  final AuthRepository _repo;
+  StreamSubscription<UserEntity?>? _sub;
 
-  AuthBloc(this._authRepository) : super(const Initial()) {
-    on<AuthEvent>((event, emit) async {
-      if (event is LoginRequested) {
-        await _onLoginRequested(event.email, event.password, emit);
-      } else if (event is RegisterRequested) {
-        await _onRegisterRequested(
-          event.email,
-          event.password,
-          event.name,
-          emit,
-        );
-      } else if (event is LogoutRequested) {
-        await _onLogoutRequested(emit);
-      } else if (event is UserChanged) {
-        await _onUserChanged(event.user, emit);
-      } else if (event is GetCurrentUserRequested) {
-        await _onGetCurrentUserRequested(emit);
-      }
-    });
+  AuthBloc(this._repo) : super(AuthInitial()) {
+    on<LoginRequested>(_onLogin);
+    on<RegisterRequested>(_onRegister);
+    on<LogoutRequested>(_onLogout);
+    on<UserChanged>(_onUserChanged);
+
+    _sub = _repo.user.listen((user) => add(UserChanged(user)));
   }
 
   /// Handle login request
-  Future<void> _onLoginRequested(
-    String email,
-    String password,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(const Loading());
-
-    final result = await _authRepository.login(email, password);
-
+  Future<void> _onLogin(LoginRequested event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    final result = await _repo.login(event.email, event.password);
     result.fold(
-      (error) => emit(Failure(error)),
+      (error) => emit(AuthError(error)),
       (user) => emit(Authenticated(user)),
     );
   }
 
-  Future<void> _onRegisterRequested(
-    String email,
-    String password,
-    String name,
+  /// Handle register request
+  Future<void> _onRegister(
+    RegisterRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(const Loading());
-
-    final result = await _authRepository.register(email, password, name);
-
+    emit(AuthLoading());
+    final result = await _repo.register(
+      event.email,
+      event.password,
+      event.name,
+      event.role,
+    );
     result.fold(
-      (error) => emit(Failure(error)),
+      (error) => emit(AuthError(error)),
       (user) => emit(Authenticated(user)),
     );
   }
 
   /// Handle logout request
-  Future<void> _onLogoutRequested(Emitter<AuthState> emit) async {
-    await _authRepository.logout();
-    emit(const Unauthenticated());
+  Future<void> _onLogout(LogoutRequested event, Emitter<AuthState> emit) async {
+    await _repo.logout();
+    emit(Unauthenticated());
   }
 
   /// Handle user changed event
-  Future<void> _onUserChanged(UserEntity user, Emitter<AuthState> emit) async {
-    emit(Authenticated(user));
+  void _onUserChanged(UserChanged event, Emitter<AuthState> emit) {
+    if (event.user != null) {
+      emit(Authenticated(event.user!));
+    } else {
+      emit(Unauthenticated());
+    }
   }
 
-  /// Handle get current user request
-  Future<void> _onGetCurrentUserRequested(Emitter<AuthState> emit) async {
-    emit(const Loading());
-
-    final result = await _authRepository.getCurrentUser();
-
-    result.fold(
-      () => emit(const Unauthenticated()),
-      (user) => emit(Authenticated(user)),
-    );
+  @override
+  Future<void> close() {
+    _sub?.cancel();
+    return super.close();
   }
 
   /// Check if current user can create events

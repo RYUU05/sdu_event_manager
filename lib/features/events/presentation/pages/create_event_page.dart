@@ -64,17 +64,21 @@ class _CreateEventPageState extends State<CreateEventPage> {
   }
 
   Future<void> _submitForm() async {
-    if (_formKey.currentState!.validate()) {
-      if (_selectedDate == null || _selectedTime == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please select date and time'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
+    if (!_formKey.currentState!.validate()) return;
 
+    if (_selectedDate == null || _selectedTime == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Select date and time')));
+      return;
+    }
+
+    final authState = context.read<AuthBloc>().state;
+    if (authState is! Authenticated) return;
+
+    setState(() => _isLoading = true);
+
+    try {
       final dateTime = DateTime(
         _selectedDate!.year,
         _selectedDate!.month,
@@ -83,198 +87,90 @@ class _CreateEventPageState extends State<CreateEventPage> {
         _selectedTime!.minute,
       );
 
-      setState(() => _isLoading = true);
+      await FirebaseFirestore.instance.collection('events').add({
+        'title': _titleController.text,
+        'description': _descriptionController.text,
+        'location': _locationController.text,
+        'category': _selectedCategory,
+        'dateTime': Timestamp.fromDate(dateTime),
+        'clubId': authState.user.id,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
 
-      try {
-        // Get current user from AuthBloc
-        final authState = context.read<AuthBloc>().state;
-        if (authState is! Authenticated) {
-          throw Exception('User not authenticated');
-        }
-
-        // Save event to Firestore
-        await FirebaseFirestore.instance.collection('events').add({
-          'title': _titleController.text.trim(),
-          'description': _descriptionController.text.trim(),
-          'category': _selectedCategory,
-          'location': _locationController.text.trim(),
-          'dateTime': Timestamp.fromDate(dateTime),
-          'clubId': authState.user.id,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Event created successfully!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          context.router.pop();
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: ${e.toString()}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      } finally {
-        if (mounted) {
-          setState(() => _isLoading = false);
-        }
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Event created!')));
+        context.router.pop();
       }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, authState) {
-        if (authState is! Authenticated ||
-            authState.user.role != UserRole.club) {
-          return Scaffold(
-            appBar: AppBar(title: const Text('Access Denied')),
-            body: const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.lock, size: 64, color: Colors.red),
-                  SizedBox(height: 16),
-                  Text(
-                    'Only clubs can create events',
-                    style: TextStyle(fontSize: 18, color: Colors.red),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
+    return Scaffold(
+      appBar: AppBar(title: const Text('Create Event')),
+      body: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, state) {
+          if (state is! Authenticated || state.user.role != UserRole.club) {
+            return const Center(child: Text('Only clubs can create events'));
+          }
 
-        final user = authState.user;
-
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Create Event'),
-            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          ),
-          body: SingleChildScrollView(
+          return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Form(
               key: _formKey,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.corporate_fare,
-                            color: Colors.purple,
-                          ),
-                          const SizedBox(width: 12),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Creating as:',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                              Text(
-                                user.name,
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Event title
                   TextFormField(
                     controller: _titleController,
                     decoration: const InputDecoration(
-                      labelText: 'Event Title',
-                      prefixIcon: Icon(Icons.event),
+                      labelText: 'Title',
                       border: OutlineInputBorder(),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter event title';
-                      }
-                      return null;
-                    },
+                    validator: (v) => v!.isEmpty ? 'Required' : null,
                   ),
                   const SizedBox(height: 16),
-
-                  // Description
                   TextFormField(
                     controller: _descriptionController,
                     decoration: const InputDecoration(
                       labelText: 'Description',
-                      prefixIcon: Icon(Icons.description),
                       border: OutlineInputBorder(),
                     ),
                     maxLines: 3,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter description';
-                      }
-                      return null;
-                    },
                   ),
                   const SizedBox(height: 16),
-
-                  // Category dropdown
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedCategory,
-                    decoration: const InputDecoration(
-                      labelText: 'Category',
-                      prefixIcon: Icon(Icons.category),
-                      border: OutlineInputBorder(),
-                    ),
-                    items: _categories.map((category) {
-                      return DropdownMenuItem(
-                        value: category,
-                        child: Text(category),
-                      );
-                    }).toList(),
-                    onChanged: (value) =>
-                        setState(() => _selectedCategory = value),
-                    validator: (value) {
-                      if (value == null) {
-                        return 'Please select category';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Location
                   TextFormField(
                     controller: _locationController,
                     decoration: const InputDecoration(
                       labelText: 'Location',
-                      prefixIcon: Icon(Icons.location_on),
                       border: OutlineInputBorder(),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter location';
-                      }
-                      return null;
-                    },
+                    validator: (v) => v!.isEmpty ? 'Required' : null,
                   ),
                   const SizedBox(height: 16),
-
-                  // Date & Time pickers
+                  DropdownButtonFormField<String>(
+                    value: _selectedCategory,
+                    decoration: const InputDecoration(
+                      labelText: 'Category',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: _categories
+                        .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                        .toList(),
+                    onChanged: (v) => setState(() => _selectedCategory = v),
+                    validator: (v) => v == null ? 'Select category' : null,
+                  ),
+                  const SizedBox(height: 16),
                   Row(
                     children: [
                       Expanded(
@@ -288,7 +184,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 16),
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: _selectTime,
@@ -303,33 +199,26 @@ class _CreateEventPageState extends State<CreateEventPage> {
                     ],
                   ),
                   const SizedBox(height: 32),
-
-                  // Submit button
-                  ElevatedButton.icon(
-                    onPressed: _isLoading ? null : _submitForm,
-                    icon: _isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : const Icon(Icons.add_circle),
-                    label: Text(_isLoading ? 'Creating...' : 'Create Event'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: Colors.purple,
-                      foregroundColor: Colors.white,
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _isLoading ? null : _submitForm,
+                      icon: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.add),
+                      label: Text(_isLoading ? 'Creating...' : 'Create Event'),
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

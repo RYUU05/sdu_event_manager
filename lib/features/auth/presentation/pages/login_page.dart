@@ -1,11 +1,8 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:event_manager/core/router/app_router.gr.dart';
-import 'package:event_manager/features/auth/domain/entities/user_entity.dart';
-import 'package:event_manager/features/auth/presentation/bloc/auth_bloc_simple.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/router/app_router.gr.dart';
+import '../bloc/auth_bloc_simple.dart';
 
 @RoutePage()
 class LoginPage extends StatefulWidget {
@@ -16,142 +13,89 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  late final TextEditingController _email;
-  late final TextEditingController _pass;
-
-  @override
-  void initState() {
-    super.initState();
-    _email = TextEditingController();
-    _pass = TextEditingController();
-  }
+  final emailCtrl = TextEditingController();
+  final passCtrl = TextEditingController();
+  bool loading = false;
 
   @override
   void dispose() {
-    _email.dispose();
-    _pass.dispose();
+    emailCtrl.dispose();
+    passCtrl.dispose();
     super.dispose();
+  }
+
+  void login() {
+    if (emailCtrl.text.isEmpty || passCtrl.text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Enter email and password')));
+      return;
+    }
+
+    setState(() => loading = true);
+    context.read<AuthBloc>().add(LoginRequested(emailCtrl.text, passCtrl.text));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(toolbarHeight: 10),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Image.asset('assets/sdu_logo.png', width: 100, height: 100),
-            SizedBox(height: 20),
-            Text(
-              'Welcome Back!',
-              style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Use Creadential to acees your account',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black.withValues(alpha: 0.5),
+      body: BlocListener<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (state is Authenticated) {
+            context.router.replace(const HomeRoute());
+          } else if (state is AuthError) {
+            setState(() => loading = false);
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'SDU Events',
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               ),
-            ),
-            SizedBox(height: 30),
-            TextField(
-              controller: _email,
-              enableSuggestions: false,
-              autocorrect: false,
-              keyboardType: TextInputType.emailAddress,
-
-              decoration: InputDecoration(
-                hint: Text('Email'),
-                prefixIcon: Icon(Icons.alternate_email),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
+              const SizedBox(height: 48),
+              TextField(
+                controller: emailCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  prefixIcon: Icon(Icons.email),
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: passCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Password',
+                  prefixIcon: Icon(Icons.lock),
+                  border: OutlineInputBorder(),
+                ),
+                obscureText: true,
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: loading ? null : login,
+                  child: loading
+                      ? const CircularProgressIndicator()
+                      : const Text('Login'),
                 ),
               ),
-            ),
-            SizedBox(height: 20),
-            TextField(
-              controller: _pass,
-              obscureText: true,
-              enableSuggestions: false,
-              autocorrect: false,
-              decoration: InputDecoration(
-                hint: Text('Password'),
-                prefixIcon: Icon(Icons.password),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () => context.router.push(const RegisterRoute()),
+                child: const Text('Create account'),
               ),
-            ),
-            SizedBox(height: 50),
-            ElevatedButton(
-              onPressed: () async {
-                final email = _email.text;
-                final pass = _pass.text;
-                try {
-                  final userCredential = await FirebaseAuth.instance
-                      .signInWithEmailAndPassword(email: email, password: pass);
-                  debugPrint(userCredential.toString());
-
-                  // Load user role from Firestore
-                  final userDoc = await FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(userCredential.user!.uid)
-                      .get();
-
-                  final roleString = userDoc.data()?['role'] ?? 'student';
-                  final role = roleString == 'club'
-                      ? UserRole.club
-                      : UserRole.student;
-
-                  // Update AuthBloc with user and role
-                  if (mounted) {
-                    final user = UserEntity(
-                      id: userCredential.user!.uid,
-                      email: email,
-                      name: userDoc.data()?['name'] ?? email,
-                      role: role,
-                    );
-                    context.read<AuthBloc>().add(UserChanged(user));
-                    context.router.replace(const HomeRoute());
-                  }
-                } on FirebaseAuthException catch (e) {
-                  if (e.code == 'user-not-found') {
-                    debugPrint('User not found');
-                  } else if (e.code == 'wrong-password') {
-                    debugPrint('wrong password');
-                  } else if (e.code == 'invalid-email') {
-                    debugPrint('Invalid email');
-                  }
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.blueAccent,
-                minimumSize: Size(double.infinity, 60),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Text('Login', style: TextStyle(fontSize: 20)),
-            ),
-            Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("Don't have an account?"),
-                TextButton(
-                  onPressed: () {
-                    context.router.push(const RegisterRoute());
-                  },
-                  child: Text('Sign up'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -32,4 +32,12 @@ class LanguageProvider extends ChangeNotifier {
       print('Error changing language: $e');
     }
   }
+
+  void toggleLanguage() {
+    if (_locale.languageCode == 'en') {
+      changeLanguage('ru');
+    } else {
+      changeLanguage('en');
+    }
+  }
 }
