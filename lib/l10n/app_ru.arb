@@ -1,5 +1,9 @@
 {
     "appTitle": "Событий",
     "comingEvents": "Ближайшие мероприятия",
-    "popularClubs": "Популярные клубы"
+    "popularClubs": "Популярные клубы",
+    "settings": "Настройки",
+    "language": "Язык",
+    "logout": "Выход"
+
 }

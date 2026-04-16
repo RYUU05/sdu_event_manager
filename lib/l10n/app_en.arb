@@ -1,5 +1,9 @@
 {
     "appTitle": "University Events",
     "comingEvents": "Upcoming Events",
-    "popularClubs": "Popular clubs"
+    "popularClubs": "Popular clubs",
+    "settings": "Settings",
+    "language": "Language",
+    "logout": "Logout"
+
 }
