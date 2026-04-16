@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:event_manager/features/home/domain/entities/event.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
@@ -130,19 +129,7 @@ class EventCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: event.isRegistrationOpen
-                              ? () {
-                                  if (event.isRegistered) {
-                                    context.read<HomeBloc>().add(
-                                      UnregisterFromEvent(event.id),
-                                    );
-                                  } else {
-                                    context.read<HomeBloc>().add(
-                                      RegisterForEvent(event.id),
-                                    );
-                                  }
-                                }
-                              : null,
+                          onPressed: event.isRegistrationOpen ? () {} : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: event.isRegistered
                                 ? Colors.grey

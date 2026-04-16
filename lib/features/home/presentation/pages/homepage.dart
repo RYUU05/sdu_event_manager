@@ -67,10 +67,8 @@ class _HomePageState extends State<HomePage> {
             if (state is HomeError) {
               return Center(child: Text('Error: ${state.message}'));
             }
-            if (state is HomeLoaded || state is HomeRefreshing) {
-              final clubs = state is HomeLoaded
-                  ? state.popularClubs
-                  : (state as HomeRefreshing).popularClubs;
+            if (state is HomeLoaded) {
+              final clubs = state.popularClubs;
 
               return SingleChildScrollView(
                 child: Column(

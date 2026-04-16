@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:event_manager/features/home/domain/entities/club.dart';
-import '../bloc/home_bloc.dart';
-import '../bloc/home_event.dart';
+import '../../domain/entities/club.dart';
 
 class ClubCard extends StatelessWidget {
   final Club club;
@@ -104,22 +101,11 @@ class ClubCard extends StatelessWidget {
                           ],
                         ),
                         const Spacer(),
-                        IconButton(
-                          onPressed: () {
-                            if (club.isFollowed) {
-                              context.read<HomeBloc>().add(
-                                UnfollowClub(club.id),
-                              );
-                            } else {
-                              context.read<HomeBloc>().add(FollowClub(club.id));
-                            }
-                          },
-                          icon: Icon(
-                            club.isFollowed
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            color: club.isFollowed ? Colors.red : Colors.grey,
-                          ),
+                        Icon(
+                          club.isFollowed
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: club.isFollowed ? Colors.red : Colors.grey,
                         ),
                       ],
                     ),
