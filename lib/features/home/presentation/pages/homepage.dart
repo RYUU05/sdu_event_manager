@@ -12,7 +12,7 @@ import '../widgets/loading_widget.dart';
 import '../widgets/error_widget.dart';
 import 'home_page_injection.dart';
 
-@RoutePage()
+@RoutePage(name: 'HomeRoute')
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 

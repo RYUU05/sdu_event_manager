@@ -12,11 +12,13 @@ class AppShell extends StatelessWidget {
       routes: const [HomeRoute(), SettingsRoute()],
       bottomNavigationBuilder: (context, tabsRouter) {
         return BottomNavigationBar(
-          items: [
+          currentIndex: tabsRouter.activeIndex,
+          onTap: tabsRouter.setActiveIndex,
+          items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
             BottomNavigationBarItem(
               icon: Icon(Icons.settings),
-              label: 'Setting',
+              label: 'Settings',
             ),
           ],
         );
