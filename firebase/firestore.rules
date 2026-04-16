@@ -20,5 +20,16 @@ service cloud.firestore {
       allow delete: if request.auth != null && 
         request.auth.uid == resource.data.clubId;
     }
+    
+    // Clubs collection
+    match /clubs/{clubId} {
+      allow read: if true; // Everyone can read clubs
+      allow create: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'club';
+      allow update: if request.auth != null && 
+        request.auth.uid == resource.data.ownerId;
+      allow delete: if request.auth != null && 
+        request.auth.uid == resource.data.ownerId;
+    }
   }
 }

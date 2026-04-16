@@ -22,14 +22,8 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
   @override
   Future<List<EventModel>> getUpcomingEvents() async {
     try {
-      final now = Timestamp.now();
-      final snapshot = await firestore
-          .collection('events')
-          .where('date', isGreaterThan: now)
-          .where('isActive', isEqualTo: true)
-          .orderBy('date', descending: false)
-          .limit(10)
-          .get();
+      // Simple query without orderBy to avoid index requirement
+      final snapshot = await firestore.collection('events').limit(10).get();
 
       return snapshot.docs
           .map((doc) => EventModel.fromJson(doc.data()..['id'] = doc.id))
@@ -42,13 +36,8 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
   @override
   Future<List<ClubModel>> getPopularClubs() async {
     try {
-      final snapshot = await firestore
-          .collection('clubs')
-          .where('isActive', isEqualTo: true)
-          .orderBy('memberCount', descending: true)
-          .orderBy('rating', descending: true)
-          .limit(10)
-          .get();
+      // Simple query without orderBy to avoid index requirement
+      final snapshot = await firestore.collection('clubs').limit(10).get();
 
       return snapshot.docs
           .map((doc) => ClubModel.fromJson(doc.data()..['id'] = doc.id))
