@@ -1,5 +1,5 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:event_manager/core/extensions/context_extensions.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:event_manager/features/auth/domain/entities/user_entity.dart';
 import 'package:event_manager/features/auth/presentation/bloc/auth_bloc_simple.dart';
 import 'package:flutter/material.dart';
@@ -18,11 +18,12 @@ class _CreateEventPageState extends State<CreateEventPage> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
-  
+
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
   String? _selectedCategory;
-  
+  bool _isLoading = false;
+
   final List<String> _categories = [
     'Academic',
     'Sports',
@@ -62,7 +63,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
     }
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       if (_selectedDate == null || _selectedTime == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -82,15 +83,49 @@ class _CreateEventPageState extends State<CreateEventPage> {
         _selectedTime!.minute,
       );
 
-      // TODO: Submit to backend
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Event created: ${_titleController.text}'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      
-      context.router.pop();
+      setState(() => _isLoading = true);
+
+      try {
+        // Get current user from AuthBloc
+        final authState = context.read<AuthBloc>().state;
+        if (authState is! Authenticated) {
+          throw Exception('User not authenticated');
+        }
+
+        // Save event to Firestore
+        await FirebaseFirestore.instance.collection('events').add({
+          'title': _titleController.text.trim(),
+          'description': _descriptionController.text.trim(),
+          'category': _selectedCategory,
+          'location': _locationController.text.trim(),
+          'dateTime': Timestamp.fromDate(dateTime),
+          'clubId': authState.user.id,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Event created successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          context.router.pop();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
+      }
     }
   }
 
@@ -98,8 +133,8 @@ class _CreateEventPageState extends State<CreateEventPage> {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, authState) {
-        // Guard: Only club users can access
-        if (authState is! Authenticated || authState.user.role != UserRole.club) {
+        if (authState is! Authenticated ||
+            authState.user.role != UserRole.club) {
           return Scaffold(
             appBar: AppBar(title: const Text('Access Denied')),
             body: const Center(
@@ -132,13 +167,15 @@ class _CreateEventPageState extends State<CreateEventPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Club info card
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Row(
                         children: [
-                          const Icon(Icons.corporate_fare, color: Colors.purple),
+                          const Icon(
+                            Icons.corporate_fare,
+                            color: Colors.purple,
+                          ),
                           const SizedBox(width: 12),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,9 +186,8 @@ class _CreateEventPageState extends State<CreateEventPage> {
                               ),
                               Text(
                                 user.name,
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -198,7 +234,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
 
                   // Category dropdown
                   DropdownButtonFormField<String>(
-                    value: _selectedCategory,
+                    initialValue: _selectedCategory,
                     decoration: const InputDecoration(
                       labelText: 'Category',
                       prefixIcon: Icon(Icons.category),
@@ -210,7 +246,8 @@ class _CreateEventPageState extends State<CreateEventPage> {
                         child: Text(category),
                       );
                     }).toList(),
-                    onChanged: (value) => setState(() => _selectedCategory = value),
+                    onChanged: (value) =>
+                        setState(() => _selectedCategory = value),
                     validator: (value) {
                       if (value == null) {
                         return 'Please select category';
@@ -269,9 +306,18 @@ class _CreateEventPageState extends State<CreateEventPage> {
 
                   // Submit button
                   ElevatedButton.icon(
-                    onPressed: _submitForm,
-                    icon: const Icon(Icons.add_circle),
-                    label: const Text('Create Event'),
+                    onPressed: _isLoading ? null : _submitForm,
+                    icon: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(Icons.add_circle),
+                    label: Text(_isLoading ? 'Creating...' : 'Create Event'),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       backgroundColor: Colors.purple,

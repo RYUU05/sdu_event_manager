@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:event_manager/core/extensions/context_extensions.dart';
 import 'package:event_manager/core/router/app_router.gr.dart';
 import 'package:event_manager/features/auth/presentation/bloc/auth_bloc_simple.dart';
@@ -25,12 +26,19 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late HomeBloc homeBloc;
+  Stream<QuerySnapshot>? _eventsStream;
 
   @override
   void initState() {
     super.initState();
     homeBloc = HomePageInjection.createHomeBloc();
     homeBloc.add(LoadHomeData());
+
+    // Load events from Firestore
+    _eventsStream = FirebaseFirestore.instance
+        .collection('events')
+        .orderBy('dateTime', descending: false)
+        .snapshots();
   }
 
   @override
