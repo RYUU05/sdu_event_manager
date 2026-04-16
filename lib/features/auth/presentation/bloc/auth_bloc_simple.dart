@@ -46,7 +46,6 @@ class AuthError extends AuthState {
   AuthError(this.message);
 }
 
-/// Authentication BLoC with role-based access control
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository _repo;
   StreamSubscription<UserEntity?>? _sub;
@@ -60,32 +59,32 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     _sub = _repo.user.listen((user) => add(UserChanged(user)));
   }
 
-  /// Handle login request
   Future<void> _onLogin(LoginRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    final result = await _repo.login(event.email, event.password);
-    result.fold(
-      (error) => emit(AuthError(error)),
-      (user) => emit(Authenticated(user)),
-    );
+    final user = await _repo.login(event.email, event.password);
+    if (user != null) {
+      emit(Authenticated(user));
+    } else {
+      emit(AuthError('Login failed'));
+    }
   }
 
-  /// Handle register request
   Future<void> _onRegister(
     RegisterRequested event,
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
-    final result = await _repo.register(
+    final user = await _repo.register(
       event.email,
       event.password,
       event.name,
       event.role,
     );
-    result.fold(
-      (error) => emit(AuthError(error)),
-      (user) => emit(Authenticated(user)),
-    );
+    if (user != null) {
+      emit(Authenticated(user));
+    } else {
+      emit(AuthError('Registration failed'));
+    }
   }
 
   /// Handle logout request

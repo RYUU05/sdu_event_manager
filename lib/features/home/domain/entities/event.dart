@@ -1,6 +1,4 @@
-import 'package:equatable/equatable.dart';
-
-class Event extends Equatable {
+class Event {
   final String id;
   final String title;
   final String description;
@@ -67,28 +65,10 @@ class Event extends Equatable {
     );
   }
 
-  bool get isRegistrationOpen => 
-      DateTime.now().isBefore(registrationDeadline) && 
+  bool get isRegistrationOpen =>
+      DateTime.now().isBefore(registrationDeadline) &&
       currentParticipants < maxParticipants;
 
-  double get registrationPercentage => 
+  double get registrationPercentage =>
       maxParticipants > 0 ? currentParticipants / maxParticipants : 0.0;
-
-  @override
-  List<Object?> get props => [
-        id,
-        title,
-        description,
-        imageUrl,
-        date,
-        registrationDeadline,
-        location,
-        maxParticipants,
-        currentParticipants,
-        clubId,
-        clubName,
-        tags,
-        isRegistered,
-        isActive,
-      ];
 }

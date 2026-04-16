@@ -1,6 +1,4 @@
-import 'package:equatable/equatable.dart';
-
-class Club extends Equatable {
+class Club {
   final String id;
   final String name;
   final String description;
@@ -46,17 +44,4 @@ class Club extends Equatable {
       isFollowed: isFollowed ?? this.isFollowed,
     );
   }
-
-  @override
-  List<Object?> get props => [
-        id,
-        name,
-        description,
-        imageUrl,
-        category,
-        memberCount,
-        rating,
-        tags,
-        isFollowed,
-      ];
 }

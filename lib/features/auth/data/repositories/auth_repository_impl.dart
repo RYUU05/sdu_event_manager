@@ -1,4 +1,3 @@
-import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/user_entity.dart';
@@ -9,41 +8,32 @@ class AuthRepositoryImpl implements AuthRepository {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   @override
-  Future<Either<String, UserEntity>> login(
-    String email,
-    String password,
-  ) async {
+  Future<UserEntity?> login(String email, String password) async {
     try {
       final result = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      if (result.user == null) {
-        return const Left('Login failed');
-      }
+      if (result.user == null) return null;
 
       final doc = await _db.collection('users').doc(result.user!.uid).get();
       final roleStr = doc.data()?['role'] ?? 'student';
       final role = roleStr == 'club' ? UserRole.club : UserRole.student;
 
-      return Right(
-        UserEntity(
-          id: result.user!.uid,
-          email: email,
-          name: doc.data()?['name'],
-          role: role,
-        ),
+      return UserEntity(
+        id: result.user!.uid,
+        email: email,
+        name: doc.data()?['name'],
+        role: role,
       );
-    } on FirebaseAuthException catch (e) {
-      return Left(e.message ?? 'Login error');
     } catch (e) {
-      return Left(e.toString());
+      return null;
     }
   }
 
   @override
-  Future<Either<String, UserEntity>> register(
+  Future<UserEntity?> register(
     String email,
     String password,
     String name,
@@ -55,9 +45,7 @@ class AuthRepositoryImpl implements AuthRepository {
         password: password,
       );
 
-      if (result.user == null) {
-        return const Left('Registration failed');
-      }
+      if (result.user == null) return null;
 
       await _db.collection('users').doc(result.user!.uid).set({
         'email': email,
@@ -66,13 +54,14 @@ class AuthRepositoryImpl implements AuthRepository {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      return Right(
-        UserEntity(id: result.user!.uid, email: email, name: name, role: role),
+      return UserEntity(
+        id: result.user!.uid,
+        email: email,
+        name: name,
+        role: role,
       );
-    } on FirebaseAuthException catch (e) {
-      return Left(e.message ?? 'Registration error');
     } catch (e) {
-      return Left(e.toString());
+      return null;
     }
   }
 
@@ -82,25 +71,23 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Option<UserEntity>> getCurrentUser() async {
+  Future<UserEntity?> getCurrentUser() async {
     final user = _auth.currentUser;
-    if (user == null) return const None();
+    if (user == null) return null;
 
     try {
       final doc = await _db.collection('users').doc(user.uid).get();
       final roleStr = doc.data()?['role'] ?? 'student';
       final role = roleStr == 'club' ? UserRole.club : UserRole.student;
 
-      return Some(
-        UserEntity(
-          id: user.uid,
-          email: user.email ?? '',
-          name: doc.data()?['name'],
-          role: role,
-        ),
+      return UserEntity(
+        id: user.uid,
+        email: user.email ?? '',
+        name: doc.data()?['name'],
+        role: role,
       );
     } catch (e) {
-      return const None();
+      return null;
     }
   }
 
