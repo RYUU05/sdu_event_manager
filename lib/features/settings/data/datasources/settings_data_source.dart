@@ -15,7 +15,7 @@ class SettingsDataSource {
   Future<void> changeLanguage(String code) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('language', code);
+      await prefs.setString(AppConstants.langKey, code);
       print('Language saved cuhh $code');
     } catch (e) {
       print("We ain't saved language cuhh $e");

@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:event_manager/core/extensions/context_extensions.dart';
+import 'package:event_manager/core/providers/language_provider.dart';
 import 'package:event_manager/core/router/app_router.gr.dart';
 import 'package:event_manager/features/settings/data/datasources/settings_data_source.dart';
 import 'package:event_manager/features/settings/data/repositories/settings_repository_impl.dart';
@@ -10,6 +11,7 @@ import 'package:event_manager/features/settings/presentation/widget/error_widget
 import 'package:event_manager/features/settings/presentation/widget/content_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
 @RoutePage(name: 'SettingsRoute')
 class SettingsPage extends StatefulWidget {
@@ -87,6 +89,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _handleLanguageChange(String language) {
+    context.read<LanguageProvider>().changeLanguage(language);
     _settingsBloc.add(LanguageEvent(language));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -140,7 +143,6 @@ class _SettingsPageState extends State<SettingsPage> {
   void _performLogout() {
     _settingsBloc.add(LogoutEvent());
 
-    // Navigate to login page after a short delay
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         context.router.replace(const LoginRoute());
