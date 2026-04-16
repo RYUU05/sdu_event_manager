@@ -16,4 +16,19 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get popularClubs => 'Популярные клубы';
+
+  @override
+  String get settings => 'Настройки';
+
+  @override
+  String get language => 'Язык';
+
+  @override
+  String get logout => 'Выход';
+
+  @override
+  String get selectingLang => 'Выборите язык';
+
+  @override
+  String get cancel => 'Отмена';
 }

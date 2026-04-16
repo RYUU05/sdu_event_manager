@@ -4,6 +4,8 @@
     "popularClubs": "Популярные клубы",
     "settings": "Настройки",
     "language": "Язык",
-    "logout": "Выход"
+    "logout": "Выход",
+    "selectingLang": "Выборите язык",
+    "cancel": "Отмена"
 
 }

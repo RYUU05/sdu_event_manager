@@ -16,4 +16,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get popularClubs => 'Popular clubs';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String get logout => 'Logout';
+
+  @override
+  String get selectingLang => 'Select langiage';
+
+  @override
+  String get cancel => 'Cancel';
 }

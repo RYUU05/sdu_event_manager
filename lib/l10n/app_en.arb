@@ -4,6 +4,8 @@
     "popularClubs": "Popular clubs",
     "settings": "Settings",
     "language": "Language",
-    "logout": "Logout"
+    "logout": "Logout",
+    "selectingLang": "Select langiage",
+    "cancel": "Cancel"
 
 }

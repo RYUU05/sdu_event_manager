@@ -1,4 +1,5 @@
 import 'package:event_manager/core/constants/app_constants.dart';
+import 'package:event_manager/core/extensions/context_extensions.dart';
 import 'package:flutter/material.dart';
 
 class ContentWidget extends StatelessWidget {
@@ -33,7 +34,7 @@ class ContentWidget extends StatelessWidget {
         children: [
           ListTile(
             leading: Icon(Icons.language),
-            title: Text('Language'),
+            title: Text(context.localization.language),
             subtitle: Text(_getLangDisplay(currentLang)),
             onTap: () => _showLang(context),
           ),
@@ -47,7 +48,7 @@ class ContentWidget extends StatelessWidget {
       elevation: 2,
       child: ListTile(
         leading: Icon(Icons.logout),
-        title: Text('Logout'),
+        title: Text(context.localization.logout),
         onTap: onLogout,
       ),
     );
@@ -68,7 +69,7 @@ class ContentWidget extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Select langiage'),
+        title: Text(context.localization.selectingLang),
         content: Column(
           children: [
             _buildLangOption(context, 'Englisg', AppConstants.english),

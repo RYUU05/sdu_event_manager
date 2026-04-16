@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:event_manager/core/extensions/context_extensions.dart';
 import 'package:event_manager/core/router/app_router.gr.dart';
 import 'package:event_manager/features/settings/data/datasources/settings_data_source.dart';
 import 'package:event_manager/features/settings/data/repositories/settings_repository_impl.dart';
@@ -55,7 +56,7 @@ class _SettingsPageState extends State<SettingsPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            'Settings',
+            context.localization.settings,
             style: Theme.of(
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
@@ -108,11 +109,11 @@ class _SettingsPageState extends State<SettingsPage> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.logout, color: Colors.red),
-            SizedBox(width: 8),
-            Text('Logout'),
+            const Icon(Icons.logout, color: Colors.red),
+            const SizedBox(width: 8),
+            Text(context.localization.logout),
           ],
         ),
         content: const Text(
@@ -121,7 +122,7 @@ class _SettingsPageState extends State<SettingsPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text('Cancel'),
           ),
           FilledButton(
             onPressed: () {
@@ -129,7 +130,7 @@ class _SettingsPageState extends State<SettingsPage> {
               _performLogout();
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Logout'),
+            child: Text(context.localization.logout),
           ),
         ],
       ),
