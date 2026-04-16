@@ -10,7 +10,6 @@ import 'package:auto_route/auto_route.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
 import '../bloc/home_state.dart';
-import '../widgets/event_card.dart';
 import '../widgets/club_card.dart';
 import '../widgets/loading_widget.dart';
 import '../widgets/error_widget.dart';
@@ -34,11 +33,8 @@ class _HomePageState extends State<HomePage> {
     homeBloc = HomePageInjection.createHomeBloc();
     homeBloc.add(LoadHomeData());
 
-    // Load events from Firestore
-    _eventsStream = FirebaseFirestore.instance
-        .collection('events')
-        .orderBy('dateTime', descending: false)
-        .snapshots();
+    // Load events from Firestore (without orderBy to avoid index requirement)
+    _eventsStream = FirebaseFirestore.instance.collection('events').snapshots();
   }
 
   @override
@@ -111,9 +107,7 @@ class _HomePageState extends State<HomePage> {
                 final events = state is HomeLoaded
                     ? state.upcomingEvents
                     : (state as HomeRefreshing).upcomingEvents;
-                final clubs = state is HomeLoaded
-                    ? state.popularClubs
-                    : (state as HomeRefreshing).popularClubs;
+                final clubs = state.clubs;
 
                 return SmartRefresher(
                   controller: refreshController,
@@ -125,33 +119,120 @@ class _HomePageState extends State<HomePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (events.isNotEmpty) ...[
-                          Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Text(
-                              context.localization.comingEvents,
-                              style: Theme.of(context).textTheme.titleLarge
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 300,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                              ),
-                              itemCount: events.length,
-                              itemBuilder: (context, index) {
-                                final event = events[index];
-                                return SizedBox(
-                                  width: 350,
-                                  child: EventCard(event: event, onTap: () {}),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
+                        // Events from Firestore
+                        StreamBuilder<QuerySnapshot>(
+                          stream: _eventsStream,
+                          builder: (context, snapshot) {
+                            if (snapshot.hasError) {
+                              return Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Text(
+                                  'Error loading events: ${snapshot.error}',
+                                  style: const TextStyle(color: Colors.red),
+                                ),
+                              );
+                            }
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Padding(
+                                padding: EdgeInsets.all(16),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+                            final docs = snapshot.data?.docs ?? [];
+                            if (docs.isEmpty) {
+                              return const Padding(
+                                padding: EdgeInsets.all(16),
+                                child: Text('No events yet'),
+                              );
+                            }
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Text(
+                                    context.localization.comingEvents,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 300,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
+                                    itemCount: docs.length,
+                                    itemBuilder: (context, index) {
+                                      final data =
+                                          docs[index].data()
+                                              as Map<String, dynamic>;
+                                      return SizedBox(
+                                        width: 350,
+                                        child: Card(
+                                          margin: const EdgeInsets.all(8),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(16),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  data['title'] ?? 'No title',
+                                                  style: Theme.of(
+                                                    context,
+                                                  ).textTheme.titleMedium,
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                                const SizedBox(height: 8),
+                                                Text(
+                                                  data['category'] ?? '',
+                                                  style: TextStyle(
+                                                    color: Colors.grey[600],
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 8),
+                                                Text(
+                                                  data['location'] ?? '',
+                                                  style: TextStyle(
+                                                    color: Colors.grey[800],
+                                                  ),
+                                                ),
+                                                const Spacer(),
+                                                Text(
+                                                  data['dateTime'] != null
+                                                      ? (data['dateTime']
+                                                                as Timestamp)
+                                                            .toDate()
+                                                            .toString()
+                                                            .substring(0, 16)
+                                                      : '',
+                                                  style: TextStyle(
+                                                    color: Colors.grey[600],
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
 
                         if (clubs.isNotEmpty) ...[
                           Padding(
