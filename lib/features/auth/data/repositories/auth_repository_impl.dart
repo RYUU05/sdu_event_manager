@@ -24,10 +24,14 @@ class AuthRepositoryImpl implements AuthRepository {
       return UserEntity(
         id: result.user!.uid,
         email: email,
-        name: doc.data()?['name'],
+        name: doc.data()?['name'] ?? email,
         role: role,
       );
+    } on FirebaseAuthException catch (e) {
+      print('Login error: ${e.code} - ${e.message}');
+      return null;
     } catch (e) {
+      print('Login error: $e');
       return null;
     }
   }
