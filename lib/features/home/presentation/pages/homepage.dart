@@ -104,10 +104,9 @@ class _HomePageState extends State<HomePage> {
               }
 
               if (state is HomeLoaded || state is HomeRefreshing) {
-                final events = state is HomeLoaded
-                    ? state.upcomingEvents
-                    : (state as HomeRefreshing).upcomingEvents;
-                final clubs = state.clubs;
+                final clubs = state is HomeLoaded
+                    ? state.popularClubs
+                    : (state as HomeRefreshing).popularClubs;
 
                 return SmartRefresher(
                   controller: refreshController,
