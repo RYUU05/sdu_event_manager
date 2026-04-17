@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:event_manager/features/auth/domain/entities/user_entity.dart';
 import 'package:event_manager/features/auth/domain/repositories/auth_repository.dart';
 
-/// Authentication events
 abstract class AuthEvent {}
 
 class LoginRequested extends AuthEvent {
@@ -27,7 +26,6 @@ class UserChanged extends AuthEvent {
   UserChanged(this.user);
 }
 
-/// Authentication states
 abstract class AuthState {}
 
 class AuthInitial extends AuthState {}
@@ -87,13 +85,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  /// Handle logout request
   Future<void> _onLogout(LogoutRequested event, Emitter<AuthState> emit) async {
     await _repo.logout();
     emit(Unauthenticated());
   }
 
-  /// Handle user changed event
   void _onUserChanged(UserChanged event, Emitter<AuthState> emit) {
     if (event.user != null) {
       emit(Authenticated(event.user!));
@@ -108,7 +104,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     return super.close();
   }
 
-  /// Check if current user can create events
   bool canCreateEvents() {
     final currentState = state;
     if (currentState is Authenticated) {
@@ -117,7 +112,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     return false;
   }
 
-  /// Get current user
   UserEntity? get currentUser {
     final currentState = state;
     if (currentState is Authenticated) {

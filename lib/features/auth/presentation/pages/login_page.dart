@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:event_manager/features/auth/presentation/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/router/app_router.gr.dart';
@@ -16,11 +17,15 @@ class _LoginPageState extends State<LoginPage> {
   final emailCtrl = TextEditingController();
   final passCtrl = TextEditingController();
   bool loading = false;
+  final emailFocusNode = FocusNode();
+  final passFocusNode = FocusNode();
 
   @override
   void dispose() {
     emailCtrl.dispose();
     passCtrl.dispose();
+    emailFocusNode.dispose();
+    passFocusNode.dispose();
     super.dispose();
   }
 
@@ -55,33 +60,39 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const Image(
+                width: double.infinity,
+                height: 200,
+                image: AssetImage('assets/sdu_logo.png'),
+              ),
+              const SizedBox(height: 50),
               const Text(
                 'SDU Events',
                 style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 48),
-              TextField(
-                controller: emailCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  prefixIcon: Icon(Icons.email),
-                  border: OutlineInputBorder(),
+              Focus(
+                child: CustonTextField(
+                  controller: emailCtrl,
+                  focusNode: emailFocusNode,
+                  label: 'Email',
+                  icon: Icons.email,
+                  textInputType: TextInputType.emailAddress,
                 ),
-                keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 16),
-              TextField(
+              CustonTextField(
                 controller: passCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                  prefixIcon: Icon(Icons.lock),
-                  border: OutlineInputBorder(),
-                ),
-                obscureText: true,
+                focusNode: passFocusNode,
+                label: 'Password',
+                icon: Icons.lock,
+                textInputType: TextInputType.visiblePassword,
+                obscure: true,
               ),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
+
                 child: ElevatedButton(
                   onPressed: loading ? null : login,
                   child: loading
