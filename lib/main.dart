@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'core/providers/language_provider.dart';
 import 'core/router/app_router.dart';
 import 'features/auth/presentation/bloc/auth_bloc_simple.dart';
@@ -8,8 +9,10 @@ import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   await Firebase.initializeApp();
+  FlutterNativeSplash.remove();
   runApp(const MyApp());
 }
 
