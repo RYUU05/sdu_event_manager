@@ -71,14 +71,12 @@ class _LoginPageState extends State<LoginPage> {
                 style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 48),
-              Focus(
-                child: CustonTextField(
-                  controller: emailCtrl,
-                  focusNode: emailFocusNode,
-                  label: 'Email',
-                  icon: Icons.email,
-                  textInputType: TextInputType.emailAddress,
-                ),
+              CustonTextField(
+                controller: emailCtrl,
+                focusNode: emailFocusNode,
+                label: 'Email',
+                icon: Icons.email,
+                textInputType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 16),
               CustonTextField(
@@ -101,9 +99,15 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              TextButton(
-                onPressed: () => context.router.push(const RegisterRoute()),
-                child: const Text('Create account'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Wanna join to our fun?'),
+                  TextButton(
+                    onPressed: () => context.router.push(const RegisterRoute()),
+                    child: const Text('Create account'),
+                  ),
+                ],
               ),
             ],
           ),
