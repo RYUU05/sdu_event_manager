@@ -1,11 +1,26 @@
 {
     "appTitle": "University Events",
+    "@appTitle": {},
     "comingEvents": "Upcoming Events",
+    "@comingEvents": {},
     "popularClubs": "Popular clubs",
+    "@popularClubs": {},
     "settings": "Settings",
+    "@settings": {},
     "language": "Language",
+    "@language": {},
     "logout": "Logout",
+    "@logout": {},
     "selectingLang": "Select langiage",
-    "cancel": "Cancel"
-
+    "@selectingLang": {},
+    "cancel": "Cancel",
+    "@cancel": {},
+    "create_event": "Create Event",
+    "@create_event": {},
+    "firstNavBar": "Events",
+    "@firstNavBar": {},
+    "secondNavBar": "Wishlist",
+    "@secondNavBar": {},
+    "thirdNavBar": "Settings",
+    "@thirdNavBar": {}
 }

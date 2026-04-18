@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:event_manager/core/constants/app_constants.dart';
 
@@ -17,7 +18,7 @@ class LanguageProvider extends ChangeNotifier {
       _locale = Locale(languageCode);
       notifyListeners();
     } catch (e) {
-      print('Error initializing language: $e');
+      debugPrint('Error initializing language: $e');
     }
   }
 
@@ -27,9 +28,9 @@ class LanguageProvider extends ChangeNotifier {
       await prefs.setString(_languageKey, languageCode);
       _locale = Locale(languageCode);
       notifyListeners();
-      print('Language changed to: $languageCode');
+      debugPrint('Language changed to: $languageCode');
     } catch (e) {
-      print('Error changing language: $e');
+      debugPrint('Error changing language: $e');
     }
   }
 

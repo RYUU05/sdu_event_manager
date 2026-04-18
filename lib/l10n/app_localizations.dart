@@ -142,6 +142,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel'**
   String get cancel;
+
+  /// No description provided for @create_event.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Event'**
+  String get create_event;
+
+  /// No description provided for @firstNavBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Events'**
+  String get firstNavBar;
+
+  /// No description provided for @secondNavBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Wishlist'**
+  String get secondNavBar;
+
+  /// No description provided for @thirdNavBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get thirdNavBar;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

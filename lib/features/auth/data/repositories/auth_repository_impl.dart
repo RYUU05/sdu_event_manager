@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/user_entity.dart';
@@ -28,10 +29,10 @@ class AuthRepositoryImpl implements AuthRepository {
         role: role,
       );
     } on FirebaseAuthException catch (e) {
-      print('Login error: ${e.code} - ${e.message}');
+      debugPrint('Login error: ${e.code} - ${e.message}');
       return null;
     } catch (e) {
-      print('Login error: $e');
+      debugPrint('Login error: $e');
       return null;
     }
   }

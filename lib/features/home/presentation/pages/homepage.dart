@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:event_manager/core/extensions/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:auto_route/auto_route.dart';
@@ -41,7 +42,9 @@ class _HomePageState extends State<HomePage> {
     return BlocProvider(
       create: (_) => homeBloc,
       child: Scaffold(
-        appBar: AppBar(title: const Text('SDU Events')),
+        appBar: AppBar(
+          title: Text(context.localization?.appTitle ?? 'University Events'),
+        ),
 
         floatingActionButton: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, authState) {
@@ -50,7 +53,9 @@ class _HomePageState extends State<HomePage> {
               return FloatingActionButton.extended(
                 onPressed: () => context.router.push(const CreateEventRoute()),
                 icon: const Icon(Icons.add),
-                label: const Text('Create Event'),
+                label: Text(
+                  context.localization?.create_event ?? 'Create Event',
+                ),
               );
             }
             return const SizedBox.shrink();
@@ -77,17 +82,17 @@ class _HomePageState extends State<HomePage> {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   }
 
-                  if (!snapshot.hasData) {
+                  if (!snapshot.hasData || snapshot.data == null) {
                     return const Center(child: CircularProgressIndicator());
                   }
 
-                  final docs = snapshot.data!.docs;
+                  final docs = snapshot.data?.docs ?? [];
 
                   return ListView(
                     padding: const EdgeInsets.all(16),
                     children: [
-                      const Text(
-                        'Upcoming Events',
+                      Text(
+                        context.localization?.comingEvents ?? 'Upcoming Events',
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,

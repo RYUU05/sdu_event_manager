@@ -31,4 +31,16 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get cancel => 'Отмена';
+
+  @override
+  String get create_event => 'Создать Ивент';
+
+  @override
+  String get firstNavBar => 'Ивенты';
+
+  @override
+  String get secondNavBar => 'Вишлист';
+
+  @override
+  String get thirdNavBar => 'Настройки';
 }

@@ -31,4 +31,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancel => 'Cancel';
+
+  @override
+  String get create_event => 'Create Event';
+
+  @override
+  String get firstNavBar => 'Events';
+
+  @override
+  String get secondNavBar => 'Wishlist';
+
+  @override
+  String get thirdNavBar => 'Settings';
 }

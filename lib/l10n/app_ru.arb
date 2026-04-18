@@ -1,11 +1,26 @@
 {
     "appTitle": "Событий",
+    "@appTitle": {},
     "comingEvents": "Ближайшие мероприятия",
+    "@comingEvents": {},
     "popularClubs": "Популярные клубы",
+    "@popularClubs": {},
     "settings": "Настройки",
+    "@settings": {},
     "language": "Язык",
+    "@language": {},
     "logout": "Выход",
+    "@logout": {},
     "selectingLang": "Выборите язык",
-    "cancel": "Отмена"
-
+    "@selectingLang": {},
+    "cancel": "Отмена",
+    "@cancel": {},
+    "create_event": "Создать Ивент",
+    "@create_event": {},
+    "firstNavBar": "Ивенты",
+    "@firstNavBar": {},
+    "secondNavBar": "Вишлист",
+    "@secondNavBar": {},
+    "thirdNavBar": "Настройки",
+    "@thirdNavBar": {}
 }
