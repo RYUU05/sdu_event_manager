@@ -62,4 +62,18 @@ class HomeRepositoryImpl implements HomeRepository {
     if (userId == null) throw Exception('User not authenticated');
     await dataSource.unfollowClub(clubId, userId);
   }
+
+  @override
+  Future<List<Event>> getMyEvents() async {
+    final userId = auth.currentUser?.uid;
+    if (userId == null) throw Exception('User not authenticated');
+    return await dataSource.getMyEvents(userId);
+  }
+
+  @override
+  Stream<bool> isRegisteredForEvent(String eventId) {
+    final userId = auth.currentUser?.uid;
+    if (userId == null) return Stream.value(false);
+    return dataSource.isRegisteredForEvent(eventId, userId);
+  }
 }

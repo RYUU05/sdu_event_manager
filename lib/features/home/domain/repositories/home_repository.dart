@@ -11,4 +11,6 @@ abstract class HomeRepository {
   Future<List<Event>> getEventsByClub(String clubId);
   Future<void> followClub(String clubId);
   Future<void> unfollowClub(String clubId);
+  Future<List<Event>> getMyEvents();
+  Stream<bool> isRegisteredForEvent(String eventId);
 }

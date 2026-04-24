@@ -12,6 +12,8 @@ abstract class FirebaseDataSource {
   Future<List<EventModel>> getEventsByClub(String clubId);
   Future<void> followClub(String clubId, String userId);
   Future<void> unfollowClub(String clubId, String userId);
+  Future<List<EventModel>> getMyEvents(String userId);
+  Stream<bool> isRegisteredForEvent(String eventId, String userId);
 }
 
 class FirebaseDataSourceImpl implements FirebaseDataSource {
@@ -182,5 +184,43 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
     } catch (e) {
       throw Exception('Failed to unfollow club: $e');
     }
+  }
+
+  @override
+  Future<List<EventModel>> getMyEvents(String userId) async {
+    try {
+      final eventsSnapshot = await firestore.collection('events').get();
+      final List<EventModel> myEvents = [];
+
+      for (final doc in eventsSnapshot.docs) {
+        final regDoc = await firestore
+            .collection('events')
+            .doc(doc.id)
+            .collection('registrations')
+            .doc(userId)
+            .get();
+
+        if (regDoc.exists) {
+          myEvents.add(
+            EventModel.fromJson(doc.data()..['id'] = doc.id),
+          );
+        }
+      }
+
+      return myEvents;
+    } catch (e) {
+      throw Exception('Failed to fetch my events: $e');
+    }
+  }
+
+  @override
+  Stream<bool> isRegisteredForEvent(String eventId, String userId) {
+    return firestore
+        .collection('events')
+        .doc(eventId)
+        .collection('registrations')
+        .doc(userId)
+        .snapshots()
+        .map((doc) => doc.exists);
   }
 }
