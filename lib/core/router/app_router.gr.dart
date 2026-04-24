@@ -10,6 +10,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i9;
+import 'package:event_manager/features/home/domain/entities/event.dart' as _i11;
 import 'package:event_manager/core/widgets/app_shell.dart' as _i1;
 import 'package:event_manager/features/auth/presentation/pages/login_page.dart'
     as _i4;
@@ -43,7 +44,6 @@ class AppShellRoute extends _i9.PageRouteInfo<void> {
   );
 }
 
-import 'package:event_manager/features/home/domain/entities/event.dart' as _i11;
 
 /// generated route for
 /// [_i2.CreateEventPage]
