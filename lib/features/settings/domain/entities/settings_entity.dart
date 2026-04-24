@@ -1,9 +1,19 @@
 class SettingsEntity {
   final String language;
-  const SettingsEntity({required this.language});
+  final String account;
+  final String role;
+  const SettingsEntity({
+    required this.language,
+    required this.account,
+    required this.role,
+  });
 
-  SettingsEntity copyWith({String? language}) {
-    return SettingsEntity(language: language ?? this.language);
+  SettingsEntity copyWith({String? language, String? account, String? role}) {
+    return SettingsEntity(
+      language: language ?? this.language,
+      account: account ?? this.account,
+      role: role ?? this.role,
+    );
   }
 
   @override
@@ -17,5 +27,5 @@ class SettingsEntity {
           language == other.language;
 
   @override
-  int get hashCode => language.hashCode;
+  int get hashCode => language.hashCode ^ role.hashCode ^ account.hashCode;
 }

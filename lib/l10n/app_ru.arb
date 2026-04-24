@@ -1,4 +1,4 @@
-{
+{   "@@locale": "ru",
     "appTitle": "Событий",
     "@appTitle": {},
     "comingEvents": "Ближайшие мероприятия",
@@ -22,5 +22,7 @@
     "secondNavBar": "Вишлист",
     "@secondNavBar": {},
     "thirdNavBar": "Настройки",
-    "@thirdNavBar": {}
+    "@thirdNavBar": {},
+    "account": "Аккаунт",
+    "@account": {}
 }

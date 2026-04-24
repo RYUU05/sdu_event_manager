@@ -25,7 +25,7 @@ class _SettingsPageState extends State<SettingsPage> {
     super.initState();
     final dataSource = SettingsDataSource();
     final repository = SettingsRepositoryImpl(dataSource);
-    settingsBloc = SettingsBloc(repository);
+    settingsBloc = SettingsBloc(repository, context.read<AuthBloc>());
     settingsBloc.add(LoadSettingsEvent());
   }
 
@@ -93,6 +93,13 @@ class _SettingsPageState extends State<SettingsPage> {
             if (state is SettingsLoaded) {
               return ListView(
                 children: [
+                  ListTile(
+                    leading: const Icon(Icons.account_circle_rounded),
+                    title: Text(context.localization.account),
+                    subtitle: Text(state.currentUser),
+                    trailing: Text(state.currentRole),
+                  ),
+                  const Divider(),
                   ListTile(
                     leading: const Icon(Icons.language),
                     title: Text(context.localization.language),

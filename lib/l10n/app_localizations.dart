@@ -134,7 +134,7 @@ abstract class AppLocalizations {
   /// No description provided for @selectingLang.
   ///
   /// In en, this message translates to:
-  /// **'Select langiage'**
+  /// **'Select language'**
   String get selectingLang;
 
   /// No description provided for @cancel.
@@ -166,6 +166,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings'**
   String get thirdNavBar;
+
+  /// No description provided for @account.
+  ///
+  /// In en, this message translates to:
+  /// **'Accont'**
+  String get account;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

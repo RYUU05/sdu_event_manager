@@ -27,7 +27,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logout => 'Logout';
 
   @override
-  String get selectingLang => 'Select langiage';
+  String get selectingLang => 'Select language';
 
   @override
   String get cancel => 'Cancel';
@@ -43,4 +43,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get thirdNavBar => 'Settings';
+
+  @override
+  String get account => 'Accont';
 }

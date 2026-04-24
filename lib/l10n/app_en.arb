@@ -1,4 +1,4 @@
-{
+{   "@@locale": "en",
     "appTitle": "University Events",
     "@appTitle": {},
     "comingEvents": "Upcoming Events",
@@ -22,5 +22,7 @@
     "secondNavBar": "Wishlist",
     "@secondNavBar": {},
     "thirdNavBar": "Settings",
-    "@thirdNavBar": {}
+    "@thirdNavBar": {},
+    "account": "Accont",
+    "@account": {}
 }

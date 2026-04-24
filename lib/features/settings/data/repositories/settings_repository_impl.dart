@@ -18,7 +18,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   Future<SettingsEntity> getSettings() async {
     final language = await _dataSource.getLang();
-    return SettingsEntity(language: language);
+    return SettingsEntity(language: language, account: '', role: '');
   }
 
   @override

@@ -43,4 +43,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get thirdNavBar => 'Настройки';
+
+  @override
+  String get account => 'Аккаунт';
 }

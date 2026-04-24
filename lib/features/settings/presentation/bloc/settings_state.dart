@@ -8,7 +8,9 @@ class SettingsLoading extends SettingsState {}
 
 class SettingsLoaded extends SettingsState {
   final String currentLang;
-  SettingsLoaded(this.currentLang);
+  final String currentUser;
+  final String currentRole;
+  SettingsLoaded(this.currentLang, this.currentUser, this.currentRole);
 }
 
 class SettingsError extends SettingsState {
