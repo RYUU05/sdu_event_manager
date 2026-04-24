@@ -8,11 +8,13 @@ class AppRouter extends RootStackRouter {
     AutoRoute(path: '/login', page: LoginRoute.page, initial: true),
     AutoRoute(path: '/register', page: RegisterRoute.page),
     AutoRoute(path: '/create-event', page: CreateEventRoute.page),
+    AutoRoute(path: '/event/:id', page: EventDetailRoute.page),
     AutoRoute(
       path: '/navbar',
       page: AppShellRoute.page,
       children: [
         AutoRoute(path: 'home', page: HomeRoute.page),
+        AutoRoute(path: 'my-events', page: MyEventsRoute.page),
         AutoRoute(path: 'setting', page: SettingsRoute.page),
       ],
     ),
