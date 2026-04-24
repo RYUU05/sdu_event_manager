@@ -15,7 +15,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 class EventDetailPage extends StatefulWidget {
   final String eventId;
 
-  const EventDetailPage({super.key, @PathParam('id') required this.eventId});
+  const EventDetailPage({super.key, required this.eventId});
 
   @override
   State<EventDetailPage> createState() => _EventDetailPageState();

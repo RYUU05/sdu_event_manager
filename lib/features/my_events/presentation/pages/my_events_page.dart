@@ -1,6 +1,5 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:event_manager/features/auth/presentation/bloc/auth_bloc_simple.dart';
+
 import 'package:event_manager/features/home/data/datasources/firebase_data_source.dart';
 import 'package:event_manager/features/home/data/repositories/home_repository_impl.dart';
 import 'package:event_manager/features/home/domain/entities/event.dart';
