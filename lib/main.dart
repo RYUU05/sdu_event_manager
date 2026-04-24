@@ -7,6 +7,7 @@ import 'core/router/app_router.dart';
 import 'features/auth/presentation/bloc/auth_bloc_simple.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:provider/provider.dart';
+import 'package:event_manager/l10n/app_localizations.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -27,14 +28,21 @@ class MyApp extends StatelessWidget {
       providers: [ChangeNotifierProvider(create: (_) => LanguageProvider())],
       child: BlocProvider(
         create: (_) => AuthBloc(AuthRepositoryImpl()),
-        child: MaterialApp.router(
-          title: 'SDU Events',
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-            useMaterial3: true,
-          ),
-          routerConfig: _router.config(),
+        child: Consumer<LanguageProvider>(
+          builder: (context, languageProvider, _) {
+            return MaterialApp.router(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              locale: languageProvider.locale,
+              title: 'SDU Events',
+              debugShowCheckedModeBanner: false,
+              theme: ThemeData(
+                colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+                useMaterial3: true,
+              ),
+              routerConfig: _router.config(),
+            );
+          },
         ),
       ),
     );

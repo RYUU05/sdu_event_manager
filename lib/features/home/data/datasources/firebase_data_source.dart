@@ -3,6 +3,7 @@ import 'package:event_manager/features/home/data/models/event_model.dart';
 import 'package:event_manager/features/home/data/models/club_model.dart';
 
 abstract class FirebaseDataSource {
+  Future<List<EventModel>> getAllEvents();
   Future<List<EventModel>> getUpcomingEvents();
   Future<List<ClubModel>> getPopularClubs();
   Future<void> registerForEvent(String eventId, String userId);
@@ -18,6 +19,18 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
   final String userId;
 
   FirebaseDataSourceImpl({required this.firestore, required this.userId});
+
+  @override
+  Future<List<EventModel>> getAllEvents() async {
+    try {
+      final snapshot = await firestore.collection('events').get();
+      return snapshot.docs
+          .map((doc) => EventModel.fromJson(doc.data()..['id'] = doc.id))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to fetch all events: $e');
+    }
+  }
 
   @override
   Future<List<EventModel>> getUpcomingEvents() async {

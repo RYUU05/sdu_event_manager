@@ -11,6 +11,11 @@ class HomeRepositoryImpl implements HomeRepository {
   HomeRepositoryImpl({required this.dataSource, required this.auth});
 
   @override
+  Future<List<Event>> getAllEvents() async {
+    return await dataSource.getAllEvents();
+  }
+
+  @override
   Future<List<Event>> getUpcomingEvents() async {
     return await dataSource.getUpcomingEvents();
   }

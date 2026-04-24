@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:event_manager/core/extensions/context_extensions.dart';
 import 'package:event_manager/core/router/app_router.gr.dart';
 import 'package:flutter/material.dart';
 
@@ -14,11 +15,14 @@ class AppShell extends StatelessWidget {
         return BottomNavigationBar(
           currentIndex: tabsRouter.activeIndex,
           onTap: tabsRouter.setActiveIndex,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
-              label: 'Settings',
+              icon: const Icon(Icons.home),
+              label: context.localization.firstNavBar,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.settings),
+              label: context.localization.thirdNavBar,
             ),
           ],
         );

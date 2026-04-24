@@ -2,6 +2,7 @@ import '../entities/event.dart';
 import '../entities/club.dart';
 
 abstract class HomeRepository {
+  Future<List<Event>> getAllEvents();
   Future<List<Event>> getUpcomingEvents();
   Future<List<Club>> getPopularClubs();
   Future<void> registerForEvent(String eventId);

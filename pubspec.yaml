@@ -11,7 +11,6 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-
   intl: ^0.20.2
   cupertino_icons: ^1.0.8
   firebase_auth: ^6.3.0
@@ -36,7 +35,8 @@ dev_dependencies:
 
   flutter_lints: ^5.0.0
 
-
+flutter_gen:
+  output: lib/l10n/
 
 flutter:
   uses-material-design: true

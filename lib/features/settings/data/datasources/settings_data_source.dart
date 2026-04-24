@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:event_manager/core/constants/app_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:event_manager/core/constants/app_constants.dart';
 
 class SettingsDataSource {
   Future<void> logout() async {

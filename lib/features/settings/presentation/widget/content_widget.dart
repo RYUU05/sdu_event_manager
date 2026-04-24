@@ -34,7 +34,7 @@ class ContentWidget extends StatelessWidget {
         children: [
           ListTile(
             leading: Icon(Icons.language),
-            title: Text(context.localization?.language ?? 'Language'),
+            title: Text(context.localization.language),
             subtitle: Text(_getLangDisplay(currentLang)),
             onTap: () => _showLang(context),
           ),
@@ -48,7 +48,7 @@ class ContentWidget extends StatelessWidget {
       elevation: 2,
       child: ListTile(
         leading: Icon(Icons.logout),
-        title: Text(context.localization?.logout ?? 'Logout'),
+        title: Text(context.localization.logout),
         onTap: onLogout,
       ),
     );
@@ -69,7 +69,7 @@ class ContentWidget extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(context.localization?.selectingLang ?? 'Select Language'),
+        title: Text(context.localization.selectingLang),
         content: Column(
           children: [
             _buildLangOption(context, 'Englisg', AppConstants.english),

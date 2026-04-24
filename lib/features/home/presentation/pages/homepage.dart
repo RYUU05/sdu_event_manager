@@ -42,9 +42,7 @@ class _HomePageState extends State<HomePage> {
     return BlocProvider(
       create: (_) => homeBloc,
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(context.localization?.appTitle ?? 'University Events'),
-        ),
+        appBar: AppBar(title: Text(context.localization.appTitle)),
 
         floatingActionButton: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, authState) {
@@ -53,9 +51,7 @@ class _HomePageState extends State<HomePage> {
               return FloatingActionButton.extended(
                 onPressed: () => context.router.push(const CreateEventRoute()),
                 icon: const Icon(Icons.add),
-                label: Text(
-                  context.localization?.create_event ?? 'Create Event',
-                ),
+                label: Text(context.localization.create_event),
               );
             }
             return const SizedBox.shrink();
@@ -92,7 +88,7 @@ class _HomePageState extends State<HomePage> {
                     padding: const EdgeInsets.all(16),
                     children: [
                       Text(
-                        context.localization?.comingEvents ?? 'Upcoming Events',
+                        context.localization.comingEvents,
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,

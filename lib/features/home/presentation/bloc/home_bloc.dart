@@ -19,7 +19,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     debugPrint('HomeBloc: Loading data...');
 
     try {
-      final events = await homeRepository.getUpcomingEvents();
+      final events = await homeRepository.getAllEvents();
       debugPrint('HomeBloc: Loaded ${events.length} events');
       final clubs = await homeRepository.getPopularClubs();
       debugPrint('HomeBloc: Loaded ${clubs.length} clubs');
