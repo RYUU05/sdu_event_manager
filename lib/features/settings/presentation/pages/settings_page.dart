@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:event_manager/core/extensions/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/providers/language_provider.dart';
@@ -39,6 +40,40 @@ class _SettingsPageState extends State<SettingsPage> {
     context.router.replace(const LoginRoute());
   }
 
+  void _showLanguageDialog(
+    BuildContext context,
+    LanguageProvider provider,
+    String currentLang,
+  ) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Select language'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: const Text('English'),
+              trailing: currentLang == 'en' ? const Icon(Icons.check) : null,
+              onTap: () {
+                provider.changeLanguage('en');
+                Navigator.pop(ctx);
+              },
+            ),
+            ListTile(
+              title: const Text('Русский'),
+              trailing: currentLang == 'ru' ? const Icon(Icons.check) : null,
+              onTap: () {
+                provider.changeLanguage('ru');
+                Navigator.pop(ctx);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final languageProvider = context.watch<LanguageProvider>();
@@ -46,7 +81,7 @@ class _SettingsPageState extends State<SettingsPage> {
     return BlocProvider(
       create: (_) => settingsBloc,
       child: Scaffold(
-        appBar: AppBar(title: const Text('Settings')),
+        appBar: AppBar(title: Text(context.localization.settings)),
         body: BlocBuilder<SettingsBloc, SettingsState>(
           builder: (context, state) {
             if (state is SettingsLoading) {
@@ -60,18 +95,22 @@ class _SettingsPageState extends State<SettingsPage> {
                 children: [
                   ListTile(
                     leading: const Icon(Icons.language),
-                    title: const Text('Language'),
-                    subtitle: Text(state.currentLang),
+                    title: Text(context.localization.language),
+                    subtitle: Text(
+                      state.currentLang == 'en' ? 'English' : 'Русский',
+                    ),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      languageProvider.toggleLanguage();
-                    },
+                    onTap: () => _showLanguageDialog(
+                      context,
+                      languageProvider,
+                      state.currentLang,
+                    ),
                   ),
                   const Divider(),
                   ListTile(
                     leading: const Icon(Icons.logout, color: Colors.red),
-                    title: const Text(
-                      'Logout',
+                    title: Text(
+                      context.localization.logout,
                       style: TextStyle(color: Colors.red),
                     ),
                     onTap: logout,
