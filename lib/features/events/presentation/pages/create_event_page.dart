@@ -5,9 +5,13 @@ import 'package:event_manager/features/auth/presentation/bloc/auth_bloc_simple.d
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:event_manager/features/home/domain/entities/event.dart';
+
 @RoutePage(name: 'CreateEventRoute')
 class CreateEventPage extends StatefulWidget {
-  const CreateEventPage({super.key});
+  final Event? eventToEdit;
+  
+  const CreateEventPage({super.key, this.eventToEdit});
 
   @override
   State<CreateEventPage> createState() => _CreateEventPageState();
@@ -32,6 +36,24 @@ class _CreateEventPageState extends State<CreateEventPage> {
     'Career',
     'Other',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.eventToEdit != null) {
+      final e = widget.eventToEdit!;
+      _titleController.text = e.title;
+      _descriptionController.text = e.description;
+      _locationController.text = e.location;
+      _selectedDate = e.date;
+      _selectedTime = TimeOfDay.fromDateTime(e.date);
+      if (_categories.contains(e.tags.isNotEmpty ? e.tags.first : 'Other')) {
+        _selectedCategory = e.tags.first;
+      } else {
+        _selectedCategory = 'Other';
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -87,21 +109,37 @@ class _CreateEventPageState extends State<CreateEventPage> {
         _selectedTime!.minute,
       );
 
-      await FirebaseFirestore.instance.collection('events').add({
+      final eventData = {
         'title': _titleController.text,
         'description': _descriptionController.text,
         'location': _locationController.text,
         'category': _selectedCategory,
         'dateTime': Timestamp.fromDate(dateTime),
         'clubId': authState.user.id,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+        'clubName': authState.user.name,
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
 
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Event created!')));
-        context.router.pop();
+      if (widget.eventToEdit != null) {
+        await FirebaseFirestore.instance
+            .collection('events')
+            .doc(widget.eventToEdit!.id)
+            .update(eventData);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Event updated!')),
+          );
+          context.router.maybePop();
+        }
+      } else {
+        eventData['createdAt'] = FieldValue.serverTimestamp();
+        await FirebaseFirestore.instance.collection('events').add(eventData);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Event created!')),
+          );
+          context.router.maybePop();
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -116,8 +154,9 @@ class _CreateEventPageState extends State<CreateEventPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.eventToEdit != null;
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Event')),
+      appBar: AppBar(title: Text(isEditing ? 'Edit Event' : 'Create Event')),
       body: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
           if (state is! Authenticated || state.user.role != UserRole.club) {
@@ -209,8 +248,12 @@ class _CreateEventPageState extends State<CreateEventPage> {
                               height: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Icon(Icons.add),
-                      label: Text(_isLoading ? 'Creating...' : 'Create Event'),
+                          : Icon(isEditing ? Icons.save : Icons.add),
+                      label: Text(
+                        _isLoading
+                            ? (isEditing ? 'Saving...' : 'Creating...')
+                            : (isEditing ? 'Save Event' : 'Create Event'),
+                      ),
                     ),
                   ),
                 ],

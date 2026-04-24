@@ -68,18 +68,22 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
       final batch = firestore.batch();
 
       final eventRef = firestore.collection('events').doc(eventId);
-      final registrationRef = firestore
-          .collection('events')
-          .doc(eventId)
-          .collection('registrations')
-          .doc(userId);
+      final userRef = firestore.collection('users').doc(userId);
 
-      batch.set(registrationRef, {
-        'userId': userId,
-        'registeredAt': Timestamp.now(),
+      // Add event to user's registeredEvents array
+      batch.set(
+        userRef,
+        {
+          'registeredEvents': FieldValue.arrayUnion([eventId])
+        },
+        SetOptions(merge: true),
+      );
+
+      // Update participant counts and add user to event's participants array
+      batch.update(eventRef, {
+        'currentParticipants': FieldValue.increment(1),
+        'participants': FieldValue.arrayUnion([userId]),
       });
-
-      batch.update(eventRef, {'currentParticipants': FieldValue.increment(1)});
 
       await batch.commit();
     } catch (e) {
@@ -93,15 +97,22 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
       final batch = firestore.batch();
 
       final eventRef = firestore.collection('events').doc(eventId);
-      final registrationRef = firestore
-          .collection('events')
-          .doc(eventId)
-          .collection('registrations')
-          .doc(userId);
+      final userRef = firestore.collection('users').doc(userId);
 
-      batch.delete(registrationRef);
+      // Remove from user's registeredEvents array
+      batch.set(
+        userRef,
+        {
+          'registeredEvents': FieldValue.arrayRemove([eventId])
+        },
+        SetOptions(merge: true),
+      );
 
-      batch.update(eventRef, {'currentParticipants': FieldValue.increment(-1)});
+      // Update participant counts and remove user from event's participants array
+      batch.update(eventRef, {
+        'currentParticipants': FieldValue.increment(-1),
+        'participants': FieldValue.arrayRemove([userId]),
+      });
 
       await batch.commit();
     } catch (e) {
@@ -189,24 +200,24 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
   @override
   Future<List<EventModel>> getMyEvents(String userId) async {
     try {
-      final eventsSnapshot = await firestore.collection('events').get();
+      final userDoc = await firestore.collection('users').doc(userId).get();
+      if (!userDoc.exists) return [];
+
+      final data = userDoc.data() ?? {};
+      final List<dynamic> registeredEvents = data['registeredEvents'] ?? [];
+
+      if (registeredEvents.isEmpty) return [];
+
       final List<EventModel> myEvents = [];
-
-      for (final doc in eventsSnapshot.docs) {
-        final regDoc = await firestore
-            .collection('events')
-            .doc(doc.id)
-            .collection('registrations')
-            .doc(userId)
-            .get();
-
-        if (regDoc.exists) {
+      for (final docId in registeredEvents) {
+        final eventDoc =
+            await firestore.collection('events').doc(docId as String).get();
+        if (eventDoc.exists) {
           myEvents.add(
-            EventModel.fromJson(doc.data()..['id'] = doc.id),
+            EventModel.fromJson(eventDoc.data()!..['id'] = eventDoc.id),
           );
         }
       }
-
       return myEvents;
     } catch (e) {
       throw Exception('Failed to fetch my events: $e');
@@ -215,12 +226,11 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
 
   @override
   Stream<bool> isRegisteredForEvent(String eventId, String userId) {
-    return firestore
-        .collection('events')
-        .doc(eventId)
-        .collection('registrations')
-        .doc(userId)
-        .snapshots()
-        .map((doc) => doc.exists);
+    return firestore.collection('users').doc(userId).snapshots().map((doc) {
+      if (!doc.exists) return false;
+      final data = doc.data() ?? {};
+      final List<dynamic> registeredEvents = data['registeredEvents'] ?? [];
+      return registeredEvents.contains(eventId);
+    });
   }
 }

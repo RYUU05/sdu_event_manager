@@ -43,20 +43,44 @@ class AppShellRoute extends _i9.PageRouteInfo<void> {
   );
 }
 
+import 'package:event_manager/features/home/domain/entities/event.dart' as _i11;
+
 /// generated route for
 /// [_i2.CreateEventPage]
-class CreateEventRoute extends _i9.PageRouteInfo<void> {
-  const CreateEventRoute({List<_i9.PageRouteInfo>? children})
-    : super(CreateEventRoute.name, initialChildren: children);
+class CreateEventRoute extends _i9.PageRouteInfo<CreateEventRouteArgs> {
+  CreateEventRoute({
+    _i10.Key? key,
+    _i11.Event? eventToEdit,
+    List<_i9.PageRouteInfo>? children,
+  }) : super(
+         CreateEventRoute.name,
+         args: CreateEventRouteArgs(key: key, eventToEdit: eventToEdit),
+         initialChildren: children,
+       );
 
   static const String name = 'CreateEventRoute';
 
   static _i9.PageInfo page = _i9.PageInfo(
     name,
     builder: (data) {
-      return const _i2.CreateEventPage();
+      final args = data.argsAs<CreateEventRouteArgs>(
+        orElse: () => const CreateEventRouteArgs(),
+      );
+      return _i2.CreateEventPage(key: args.key, eventToEdit: args.eventToEdit);
     },
   );
+}
+
+class CreateEventRouteArgs {
+  const CreateEventRouteArgs({this.key, this.eventToEdit});
+
+  final _i10.Key? key;
+  final _i11.Event? eventToEdit;
+
+  @override
+  String toString() {
+    return 'CreateEventRouteArgs{key: $key, eventToEdit: $eventToEdit}';
+  }
 }
 
 /// generated route for

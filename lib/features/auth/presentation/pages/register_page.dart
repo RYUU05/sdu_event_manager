@@ -53,6 +53,43 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> registerClub() async {
+    // Show dialog to ask for Club Name
+    final clubNameCtrl = TextEditingController();
+    final clubName = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Название клуба'),
+          content: TextField(
+            controller: clubNameCtrl,
+            decoration: const InputDecoration(
+              hintText: 'Введите название',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, null),
+              child: const Text('Отмена'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final name = clubNameCtrl.text.trim();
+                if (name.isNotEmpty) {
+                  Navigator.pop(ctx, name);
+                }
+              },
+              child: const Text('Продолжить'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (clubName == null || clubName.isEmpty) {
+      return; // Canceled or empty
+    }
+
     try {
       final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailCtrl.text,
@@ -65,6 +102,7 @@ class _RegisterPageState extends State<RegisterPage> {
           .set({
             'email': emailCtrl.text,
             'role': 'club',
+            'name': clubName,
             'createdAt': FieldValue.serverTimestamp(),
           });
 

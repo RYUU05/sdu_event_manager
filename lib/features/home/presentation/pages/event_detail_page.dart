@@ -58,9 +58,15 @@ class _EventDetailPageState extends State<EventDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Check role via AuthBloc
     final authState = context.watch<AuthBloc>().state;
-    final isStudent = authState is Authenticated &&
-        authState.user.role == UserRole.student;
+    final isStudent = authState is Authenticated && authState.user.role == UserRole.student;
+    final isClub = authState is Authenticated && authState.user.role == UserRole.club;
+    final isLoggedIn = FirebaseAuth.instance.currentUser != null;
+    
+    // Show participate button strictly for students
+    final showButton = isLoggedIn && isStudent;
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
     return Scaffold(
       body: StreamBuilder<DocumentSnapshot>(
@@ -83,6 +89,8 @@ class _EventDetailPageState extends State<EventDetailPage> {
           final location = data['location'] ?? '';
           final imageUrl = data['imageUrl'] ?? '';
           final category = data['category'] ?? '';
+          final clubId = data['clubId'] ?? '';
+          final clubName = data['clubName'] ?? 'Неизвестный клуб';
           final maxP = data['maxParticipants'] ?? 0;
           final currP = data['currentParticipants'] ?? 0;
           final percentage = maxP > 0 ? (currP / maxP).clamp(0.0, 1.0) : 0.0;
@@ -105,6 +113,35 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   icon: const Icon(Icons.arrow_back),
                   onPressed: () => context.router.maybePop(),
                 ),
+                actions: [
+                  if (isClub && clubId == currentUserId)
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      tooltip: 'Редактировать ивент',
+                      onPressed: () {
+                        // Pass a dummy Event object or actually construct one
+                        // Since CreateEventRoute takes Event?, we need to pass it
+                        // For this we need to construct Event from data
+                        final ev = Event(
+                          id: widget.eventId,
+                          title: title,
+                          description: description,
+                          imageUrl: imageUrl,
+                          date: dateTime ?? DateTime.now(),
+                          registrationDeadline: dateTime ?? DateTime.now(),
+                          location: location,
+                          maxParticipants: maxP,
+                          currentParticipants: currP,
+                          clubId: clubId,
+                          clubName: clubName,
+                          tags: [category],
+                          isRegistered: false,
+                          isActive: true,
+                        );
+                        context.router.push(CreateEventRoute(eventToEdit: ev));
+                      },
+                    ),
+                ],
                 flexibleSpace: FlexibleSpaceBar(
                   title: Text(
                     title,
@@ -140,6 +177,13 @@ class _EventDetailPageState extends State<EventDetailPage> {
                         ),
 
                       const SizedBox(height: 16),
+
+                      // Organizer (Club Name)
+                      _InfoRow(
+                        icon: Icons.business_outlined,
+                        text: 'Организатор: $clubName',
+                      ),
+                      const SizedBox(height: 8),
 
                       // Date & Location
                       _InfoRow(
@@ -203,19 +247,20 @@ class _EventDetailPageState extends State<EventDetailPage> {
 
                       const SizedBox(height: 32),
 
-                      // Register / Unregister button (students only)
-                      if (isStudent)
+                      // Register / Unregister button
+                      if (showButton)
                         StreamBuilder<DocumentSnapshot>(
                           stream: FirebaseFirestore.instance
-                              .collection('events')
-                              .doc(widget.eventId)
-                              .collection('registrations')
-                              .doc(FirebaseAuth.instance.currentUser?.uid)
+                              .collection('users')
+                              .doc(currentUserId)
                               .snapshots(),
                           builder: (context, regSnap) {
-                            final isRegistered =
-                                regSnap.data?.exists ?? false;
-                            final isFull = currP >= maxP && !isRegistered;
+                            final userData = regSnap.data?.data() as Map<String, dynamic>?;
+                            final List<dynamic> registeredEvents = userData?['registeredEvents'] ?? [];
+                            final isRegistered = registeredEvents.contains(widget.eventId);
+                            // isFull only when maxP is set and slots ran out
+                            final isFull =
+                                maxP > 0 && currP >= maxP && !isRegistered;
 
                             return SizedBox(
                               width: double.infinity,
@@ -228,31 +273,43 @@ class _EventDetailPageState extends State<EventDetailPage> {
                                           widget.eventId,
                                         ),
                                 icon: _isLoading
-                                    ? const SizedBox(
+                                    ? SizedBox(
                                         width: 18,
                                         height: 18,
                                         child: CircularProgressIndicator(
-                                          color: Colors.white,
+                                          color: isRegistered
+                                              ? Colors.red
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
                                           strokeWidth: 2,
                                         ),
                                       )
                                     : Icon(isRegistered
                                         ? Icons.cancel_outlined
-                                        : Icons.bookmark_add_outlined),
+                                        : Icons.check_circle_outline),
                                 label: Text(
                                   isFull
                                       ? 'Мест нет'
                                       : isRegistered
                                           ? 'Отменить участие'
                                           : 'Участвовать',
-                                  style: const TextStyle(fontSize: 16),
+                                  style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600),
                                 ),
                                 style: FilledButton.styleFrom(
                                   backgroundColor: isRegistered
-                                      ? Colors.red[400]
+                                      ? Colors.red.withOpacity(0.1)
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .primaryContainer,
+                                  foregroundColor: isRegistered
+                                      ? Colors.red
                                       : Theme.of(context).colorScheme.primary,
+                                  elevation: 0,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(16),
                                   ),
                                 ),
                               ),
@@ -263,7 +320,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                       const SizedBox(height: 16),
 
                       // Go to my events shortcut
-                      if (isStudent)
+                      if (showButton)
                         Center(
                           child: TextButton.icon(
                             onPressed: () =>
