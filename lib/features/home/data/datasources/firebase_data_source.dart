@@ -111,6 +111,7 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
       });
     } catch (e) {
       debugPrint('Update event document failed (check Firestore Rules): $e');
+      throw Exception('Ошибка доступа к Firebase. Обновите Firestore Rules!');
     }
   }
 
