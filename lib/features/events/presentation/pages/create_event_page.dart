@@ -209,6 +209,14 @@ class _CreateEventPageState extends State<CreateEventPage> {
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
+                    controller: _imageUrlController,
+                    decoration: const InputDecoration(
+                      labelText: 'Image URL (Poster) - Optional',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
                     controller: _maxParticipantsController,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
