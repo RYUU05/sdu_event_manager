@@ -23,6 +23,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
   final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
   final _maxParticipantsController = TextEditingController();
+  final _imageUrlController = TextEditingController();
 
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
@@ -47,6 +48,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
       _descriptionController.text = e.description;
       _locationController.text = e.location;
       _maxParticipantsController.text = e.maxParticipants > 0 ? e.maxParticipants.toString() : '';
+      _imageUrlController.text = e.imageUrl;
       _selectedDate = e.date;
       _selectedTime = TimeOfDay.fromDateTime(e.date);
       if (_categories.contains(e.tags.isNotEmpty ? e.tags.first : 'Other')) {
@@ -63,6 +65,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
     _descriptionController.dispose();
     _locationController.dispose();
     _maxParticipantsController.dispose();
+    _imageUrlController.dispose();
     super.dispose();
   }
 
@@ -116,6 +119,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
         'title': _titleController.text,
         'description': _descriptionController.text,
         'location': _locationController.text,
+        'imageUrl': _imageUrlController.text.trim(),
         'category': _selectedCategory,
         'maxParticipants': int.tryParse(_maxParticipantsController.text) ?? 0,
         'dateTime': Timestamp.fromDate(dateTime),
