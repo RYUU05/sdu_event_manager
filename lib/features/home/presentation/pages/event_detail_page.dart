@@ -205,7 +205,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                               size: 18, color: Colors.grey[600]),
                           const SizedBox(width: 6),
                           Text(
-                            '$currP / $maxP участников',
+                            maxP > 0 ? '$currP / $maxP участников' : '$currP участников (без ограничений)',
                             style: TextStyle(color: Colors.grey[700]),
                           ),
                         ],
