@@ -5,6 +5,9 @@ import 'package:event_manager/features/auth/presentation/bloc/auth_bloc_simple.d
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:event_manager/features/home/domain/entities/event.dart';
 
 @RoutePage(name: 'CreateEventRoute')
@@ -23,7 +26,10 @@ class _CreateEventPageState extends State<CreateEventPage> {
   final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
   final _maxParticipantsController = TextEditingController();
-  final _imageUrlController = TextEditingController();
+
+  File? _selectedImage;
+  String? _existingImageUrl;
+  final ImagePicker _picker = ImagePicker();
 
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
@@ -48,7 +54,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
       _descriptionController.text = e.description;
       _locationController.text = e.location;
       _maxParticipantsController.text = e.maxParticipants > 0 ? e.maxParticipants.toString() : '';
-      _imageUrlController.text = e.imageUrl;
+      _existingImageUrl = e.imageUrl;
       _selectedDate = e.date;
       _selectedTime = TimeOfDay.fromDateTime(e.date);
       if (_categories.contains(e.tags.isNotEmpty ? e.tags.first : 'Other')) {
@@ -65,7 +71,6 @@ class _CreateEventPageState extends State<CreateEventPage> {
     _descriptionController.dispose();
     _locationController.dispose();
     _maxParticipantsController.dispose();
-    _imageUrlController.dispose();
     super.dispose();
   }
 
@@ -88,6 +93,21 @@ class _CreateEventPageState extends State<CreateEventPage> {
     );
     if (picked != null) {
       setState(() => _selectedTime = picked);
+    }
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+      if (image != null) {
+        setState(() {
+          _selectedImage = File(image.path);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error picking image: $e')));
+      }
     }
   }
 
@@ -115,11 +135,19 @@ class _CreateEventPageState extends State<CreateEventPage> {
         _selectedTime!.minute,
       );
 
+      String finalImageUrl = _existingImageUrl ?? '';
+      
+      if (_selectedImage != null) {
+        final ref = FirebaseStorage.instance.ref().child('events').child('${DateTime.now().millisecondsSinceEpoch}.jpg');
+        await ref.putFile(_selectedImage!);
+        finalImageUrl = await ref.getDownloadURL();
+      }
+
       final eventData = {
         'title': _titleController.text,
         'description': _descriptionController.text,
         'location': _locationController.text,
-        'imageUrl': _imageUrlController.text.trim(),
+        'imageUrl': finalImageUrl,
         'category': _selectedCategory,
         'maxParticipants': int.tryParse(_maxParticipantsController.text) ?? 0,
         'dateTime': Timestamp.fromDate(dateTime),
@@ -208,11 +236,34 @@ class _CreateEventPageState extends State<CreateEventPage> {
                     validator: (v) => v!.isEmpty ? 'Required' : null,
                   ),
                   const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _imageUrlController,
-                    decoration: const InputDecoration(
-                      labelText: 'Image URL (Poster) - Optional',
-                      border: OutlineInputBorder(),
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
+                      height: 150,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey[400]!),
+                      ),
+                      child: _selectedImage != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.file(_selectedImage!, fit: BoxFit.cover),
+                            )
+                          : _existingImageUrl != null && _existingImageUrl!.isNotEmpty
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(_existingImageUrl!, fit: BoxFit.cover),
+                                )
+                              : const Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.add_photo_alternate, size: 40, color: Colors.grey),
+                                    SizedBox(height: 8),
+                                    Text('Tap to add poster/image', style: TextStyle(color: Colors.grey)),
+                                  ],
+                                ),
                     ),
                   ),
                   const SizedBox(height: 16),
