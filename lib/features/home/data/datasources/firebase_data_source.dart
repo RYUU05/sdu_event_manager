@@ -134,13 +134,16 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
       final snapshot = await firestore
           .collection('events')
           .where('clubId', isEqualTo: clubId)
-          .where('isActive', isEqualTo: true)
-          .orderBy('date', descending: false)
           .get();
 
-      return snapshot.docs
+      var events = snapshot.docs
           .map((doc) => EventModel.fromJson(doc.data()..['id'] = doc.id))
+          .where((event) => event.isActive)
           .toList();
+          
+      events.sort((a, b) => a.date.compareTo(b.date));
+
+      return events;
     } catch (e) {
       throw Exception('Failed to fetch events by club: $e');
     }
