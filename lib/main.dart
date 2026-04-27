@@ -25,7 +25,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => LanguageProvider())],
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => LanguageProvider()..init(),
+        ),
+      ],
       child: BlocProvider(
         create: (_) => AuthBloc(AuthRepositoryImpl()),
         child: Consumer<LanguageProvider>(

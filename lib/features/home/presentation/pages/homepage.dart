@@ -49,7 +49,7 @@ class _HomePageState extends State<HomePage> {
             if (authState is Authenticated &&
                 authState.user.role == UserRole.club) {
               return FloatingActionButton.extended(
-                onPressed: () => context.router.push(const CreateEventRoute()),
+                onPressed: () => context.router.push(CreateEventRoute()),
                 icon: const Icon(Icons.add),
                 label: Text(context.localization.create_event),
               );

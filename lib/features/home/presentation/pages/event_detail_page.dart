@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:event_manager/features/auth/domain/entities/user_entity.dart';
 import 'package:event_manager/features/auth/presentation/bloc/auth_bloc_simple.dart';
+import 'package:event_manager/features/home/domain/entities/event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -300,7 +301,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                                 ),
                                 style: FilledButton.styleFrom(
                                   backgroundColor: isRegistered
-                                      ? Colors.red.withOpacity(0.1)
+                                      ? Colors.red.withAlpha(25)
                                       : Theme.of(context)
                                           .colorScheme
                                           .primaryContainer,

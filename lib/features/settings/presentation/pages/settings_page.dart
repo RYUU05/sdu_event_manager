@@ -48,7 +48,7 @@ class _SettingsPageState extends State<SettingsPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Select language'),
+        title: Text(context.localization.selectingLang),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -57,6 +57,7 @@ class _SettingsPageState extends State<SettingsPage> {
               trailing: currentLang == 'en' ? const Icon(Icons.check) : null,
               onTap: () {
                 provider.changeLanguage('en');
+                settingsBloc.add(LanguageEvent('en'));
                 Navigator.pop(ctx);
               },
             ),
@@ -65,6 +66,7 @@ class _SettingsPageState extends State<SettingsPage> {
               trailing: currentLang == 'ru' ? const Icon(Icons.check) : null,
               onTap: () {
                 provider.changeLanguage('ru');
+                settingsBloc.add(LanguageEvent('ru'));
                 Navigator.pop(ctx);
               },
             ),
@@ -104,13 +106,13 @@ class _SettingsPageState extends State<SettingsPage> {
                     leading: const Icon(Icons.language),
                     title: Text(context.localization.language),
                     subtitle: Text(
-                      state.currentLang == 'en' ? 'English' : 'Русский',
+                      languageProvider.locale.languageCode == 'en' ? 'English' : 'Русский',
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => _showLanguageDialog(
                       context,
                       languageProvider,
-                      state.currentLang,
+                      languageProvider.locale.languageCode,
                     ),
                   ),
                   const Divider(),

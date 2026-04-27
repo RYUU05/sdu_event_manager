@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:event_manager/features/home/data/models/event_model.dart';
 import 'package:event_manager/features/home/data/models/club_model.dart';
 
@@ -64,59 +65,51 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
 
   @override
   Future<void> registerForEvent(String eventId, String userId) async {
+    final eventRef = firestore.collection('events').doc(eventId);
+    final userRef = firestore.collection('users').doc(userId);
+
+    // 1. Add event to user's registeredEvents array
     try {
-      final batch = firestore.batch();
+      await userRef.set({
+        'registeredEvents': FieldValue.arrayUnion([eventId])
+      }, SetOptions(merge: true));
+    } catch (e) {
+      throw Exception('Update user document failed: $e');
+    }
 
-      final eventRef = firestore.collection('events').doc(eventId);
-      final userRef = firestore.collection('users').doc(userId);
-
-      // Add event to user's registeredEvents array
-      batch.set(
-        userRef,
-        {
-          'registeredEvents': FieldValue.arrayUnion([eventId])
-        },
-        SetOptions(merge: true),
-      );
-
-      // Update participant counts and add user to event's participants array
-      batch.update(eventRef, {
+    // 2. Update participant counts and add user to event's participants array
+    try {
+      await eventRef.update({
         'currentParticipants': FieldValue.increment(1),
         'participants': FieldValue.arrayUnion([userId]),
       });
-
-      await batch.commit();
     } catch (e) {
-      throw Exception('Failed to register for event: $e');
+      debugPrint('Update event document failed (check Firestore Rules): $e');
     }
   }
 
   @override
   Future<void> unregisterFromEvent(String eventId, String userId) async {
+    final eventRef = firestore.collection('events').doc(eventId);
+    final userRef = firestore.collection('users').doc(userId);
+
+    // 1. Remove from user's registeredEvents array
     try {
-      final batch = firestore.batch();
+      await userRef.set({
+        'registeredEvents': FieldValue.arrayRemove([eventId])
+      }, SetOptions(merge: true));
+    } catch (e) {
+      throw Exception('Update user document failed: $e');
+    }
 
-      final eventRef = firestore.collection('events').doc(eventId);
-      final userRef = firestore.collection('users').doc(userId);
-
-      // Remove from user's registeredEvents array
-      batch.set(
-        userRef,
-        {
-          'registeredEvents': FieldValue.arrayRemove([eventId])
-        },
-        SetOptions(merge: true),
-      );
-
-      // Update participant counts and remove user from event's participants array
-      batch.update(eventRef, {
+    // 2. Update participant counts and remove user from event's participants array
+    try {
+      await eventRef.update({
         'currentParticipants': FieldValue.increment(-1),
         'participants': FieldValue.arrayRemove([userId]),
       });
-
-      await batch.commit();
     } catch (e) {
-      throw Exception('Failed to unregister from event: $e');
+      debugPrint('Update event document failed (check Firestore Rules): $e');
     }
   }
 

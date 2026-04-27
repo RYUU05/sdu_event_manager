@@ -1,5 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:event_manager/features/auth/domain/entities/user_entity.dart';
+import 'package:event_manager/features/auth/presentation/bloc/auth_bloc_simple.dart';
 import 'package:event_manager/features/home/data/datasources/firebase_data_source.dart';
 import 'package:event_manager/features/home/data/repositories/home_repository_impl.dart';
 import 'package:event_manager/features/home/domain/entities/event.dart';
@@ -29,26 +31,42 @@ class MyEventsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authState = context.read<AuthBloc>().state;
+    final bool isClub = authState is Authenticated &&
+        authState.user.role == UserRole.club;
+    final String clubId =
+        authState is Authenticated ? authState.user.id : '';
+
     return BlocProvider(
-      create: (_) => _createBloc()..add(LoadMyEvents()),
-      child: const _MyEventsView(),
+      create: (_) => _createBloc()
+        ..add(isClub ? LoadClubEvents(clubId) : LoadMyEvents()),
+      child: _MyEventsView(isClub: isClub),
     );
   }
 }
 
 class _MyEventsView extends StatelessWidget {
-  const _MyEventsView();
+  final bool isClub;
+  const _MyEventsView({this.isClub = false});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Мои ивенты'),
+        title: Text(isClub ? 'Мои ивенты (клуб)' : 'Мои ивенты'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () =>
-                context.read<MyEventsBloc>().add(LoadMyEvents()),
+            onPressed: () {
+              final authState = context.read<AuthBloc>().state;
+              if (isClub && authState is Authenticated) {
+                context
+                    .read<MyEventsBloc>()
+                    .add(LoadClubEvents(authState.user.id));
+              } else {
+                context.read<MyEventsBloc>().add(LoadMyEvents());
+              }
+            },
           ),
         ],
       ),
@@ -68,8 +86,16 @@ class _MyEventsView extends StatelessWidget {
                   Text(state.message, textAlign: TextAlign.center),
                   const SizedBox(height: 16),
                   FilledButton(
-                    onPressed: () =>
-                        context.read<MyEventsBloc>().add(LoadMyEvents()),
+                    onPressed: () {
+                      final authState = context.read<AuthBloc>().state;
+                      if (isClub && authState is Authenticated) {
+                        context
+                            .read<MyEventsBloc>()
+                            .add(LoadClubEvents(authState.user.id));
+                      } else {
+                        context.read<MyEventsBloc>().add(LoadMyEvents());
+                      }
+                    },
                     child: const Text('Повторить'),
                   ),
                 ],
@@ -79,7 +105,7 @@ class _MyEventsView extends StatelessWidget {
 
           if (state is MyEventsLoaded) {
             if (state.events.isEmpty) {
-              return _EmptyState();
+              return _EmptyState(isClub: isClub);
             }
 
             return ListView.separated(
@@ -88,7 +114,7 @@ class _MyEventsView extends StatelessWidget {
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final event = state.events[index];
-                return _MyEventCard(event: event);
+                return _MyEventCard(event: event, isClub: isClub);
               },
             );
           }
@@ -101,6 +127,9 @@ class _MyEventsView extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
+  final bool isClub;
+  const _EmptyState({this.isClub = false});
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -108,31 +137,34 @@ class _EmptyState extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            Icons.bookmarks_outlined,
+            isClub ? Icons.event_note_outlined : Icons.bookmarks_outlined,
             size: 80,
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+            color: Theme.of(context).colorScheme.primary.withAlpha(76),
           ),
           const SizedBox(height: 20),
           Text(
-            'Нет записанных ивентов',
+            isClub ? 'Нет созданных ивентов' : 'Нет записанных ивентов',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: Colors.grey[600],
                 ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Нажмите «Участвовать» на ивенте,\nчтобы он появился здесь',
+            isClub
+                ? 'Создайте ивент, и он появится здесь'
+                : 'Нажмите «Участвовать» на ивенте,\nчтобы он появился здесь',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.grey[400],
                 ),
           ),
           const SizedBox(height: 24),
-          FilledButton.icon(
-            onPressed: () => context.router.navigate(const HomeRoute()),
-            icon: const Icon(Icons.search),
-            label: const Text('Найти ивенты'),
-          ),
+          if (!isClub)
+            FilledButton.icon(
+              onPressed: () => context.router.navigate(const HomeRoute()),
+              icon: const Icon(Icons.search),
+              label: const Text('Найти ивенты'),
+            ),
         ],
       ),
     );
@@ -141,8 +173,9 @@ class _EmptyState extends StatelessWidget {
 
 class _MyEventCard extends StatelessWidget {
   final Event event;
+  final bool isClub;
 
-  const _MyEventCard({required this.event});
+  const _MyEventCard({required this.event, this.isClub = false});
 
   @override
   Widget build(BuildContext context) {
@@ -189,8 +222,8 @@ class _MyEventCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      // Remove button
-                      _RemoveButton(eventId: event.id),
+                      // Remove button only for students
+                      if (!isClub) _RemoveButton(eventId: event.id),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -225,7 +258,7 @@ class _MyEventCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  // Registered badge
+                  // Badge
                   Row(
                     children: [
                       Container(
@@ -234,20 +267,33 @@ class _MyEventCard extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.green[50],
+                          color: isClub ? Colors.blue[50] : Colors.green[50],
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.green[200]!),
+                          border: Border.all(
+                            color: isClub
+                                ? Colors.blue[200]!
+                                : Colors.green[200]!,
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.check_circle,
-                                size: 14, color: Colors.green[700]),
+                            Icon(
+                              isClub
+                                  ? Icons.verified_outlined
+                                  : Icons.check_circle,
+                              size: 14,
+                              color: isClub
+                                  ? Colors.blue[700]
+                                  : Colors.green[700],
+                            ),
                             const SizedBox(width: 4),
                             Text(
-                              'Вы записаны',
+                              isClub ? 'Ваш ивент' : 'Вы записаны',
                               style: TextStyle(
-                                color: Colors.green[700],
+                                color: isClub
+                                    ? Colors.blue[700]
+                                    : Colors.green[700],
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -325,7 +371,8 @@ class _RemoveButtonState extends State<_RemoveButton> {
                 ),
               );
 
-              if (confirmed == true && mounted) {
+              if (confirmed == true) {
+                if (!context.mounted) return;
                 setState(() => _loading = true);
                 context
                     .read<MyEventsBloc>()

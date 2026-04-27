@@ -16,101 +16,88 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   final emailCtrl = TextEditingController();
   final passCtrl = TextEditingController();
-  final passFocusNode = FocusNode();
-  final emailFocusNode = FocusNode();
+  // Student fields
+  final firstNameCtrl = TextEditingController();
+  final lastNameCtrl = TextEditingController();
+  // Club field
+  final clubNameCtrl = TextEditingController();
+
+  bool _isClub = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
     emailCtrl.dispose();
     passCtrl.dispose();
-    passFocusNode.dispose();
-    emailFocusNode.dispose();
+    firstNameCtrl.dispose();
+    lastNameCtrl.dispose();
+    clubNameCtrl.dispose();
     super.dispose();
   }
 
-  Future<void> registerStudent() async {
-    try {
-      final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailCtrl.text,
-        password: passCtrl.text,
-      );
+  bool _validate() {
+    final email = emailCtrl.text.trim();
+    final pass = passCtrl.text;
 
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(cred.user!.uid)
-          .set({
-            'email': emailCtrl.text,
-            'role': 'student',
-            'createdAt': FieldValue.serverTimestamp(),
-          });
-
-      if (mounted) {
-        context.router.push(const LoginRoute());
-      }
-    } on FirebaseAuthException catch (e) {
-      showError(e.message ?? 'Error');
+    if (email.isEmpty) {
+      showError('Введите email');
+      return false;
     }
+    if (pass.length <= 8) {
+      showError('Пароль должен содержать более 8 символов');
+      return false;
+    }
+
+    if (_isClub) {
+      if (clubNameCtrl.text.trim().isEmpty) {
+        showError('Введите название клуба');
+        return false;
+      }
+    } else {
+      if (firstNameCtrl.text.trim().isEmpty || lastNameCtrl.text.trim().isEmpty) {
+        showError('Введите имя и фамилию');
+        return false;
+      }
+    }
+    return true;
   }
 
-  Future<void> registerClub() async {
-    // Show dialog to ask for Club Name
-    final clubNameCtrl = TextEditingController();
-    final clubName = await showDialog<String>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) {
-        return AlertDialog(
-          title: const Text('Название клуба'),
-          content: TextField(
-            controller: clubNameCtrl,
-            decoration: const InputDecoration(
-              hintText: 'Введите название',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, null),
-              child: const Text('Отмена'),
-            ),
-            FilledButton(
-              onPressed: () {
-                final name = clubNameCtrl.text.trim();
-                if (name.isNotEmpty) {
-                  Navigator.pop(ctx, name);
-                }
-              },
-              child: const Text('Продолжить'),
-            ),
-          ],
-        );
-      },
-    );
+  Future<void> _register() async {
+    if (!_validate()) return;
 
-    if (clubName == null || clubName.isEmpty) {
-      return; // Canceled or empty
-    }
-
+    setState(() => _isLoading = true);
     try {
       final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailCtrl.text,
+        email: emailCtrl.text.trim(),
         password: passCtrl.text,
       );
+
+      final Map<String, dynamic> userData = {
+        'email': emailCtrl.text.trim(),
+        'createdAt': FieldValue.serverTimestamp(),
+      };
+
+      if (_isClub) {
+        userData['role'] = 'club';
+        userData['name'] = clubNameCtrl.text.trim();
+      } else {
+        userData['role'] = 'student';
+        final fullName = '${firstNameCtrl.text.trim()} ${lastNameCtrl.text.trim()}';
+        userData['name'] = fullName;
+      }
 
       await FirebaseFirestore.instance
           .collection('users')
           .doc(cred.user!.uid)
-          .set({
-            'email': emailCtrl.text,
-            'role': 'club',
-            'name': clubName,
-            'createdAt': FieldValue.serverTimestamp(),
-          });
+          .set(userData);
 
       if (mounted) {
         context.router.push(const LoginRoute());
       }
     } on FirebaseAuthException catch (e) {
-      showError(e.message ?? 'Error');
+      showError(e.message ?? 'Ошибка регистрации');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -121,65 +108,120 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const SizedBox(height: 40),
             const Image(
               width: double.infinity,
-              height: 200,
+              height: 160,
               image: AssetImage('assets/sdu_logo.png'),
             ),
-            const SizedBox(height: 50),
+            const SizedBox(height: 24),
             const Text(
               'SDU Events',
               style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 48),
+            const SizedBox(height: 32),
+            // Role selector
+            SegmentedButton<bool>(
+              segments: const [
+                ButtonSegment(
+                  value: false,
+                  label: Text('Студент'),
+                  icon: Icon(Icons.school),
+                ),
+                ButtonSegment(
+                  value: true,
+                  label: Text('Клуб'),
+                  icon: Icon(Icons.business),
+                ),
+              ],
+              selected: {_isClub},
+              onSelectionChanged: (set) =>
+                  setState(() => _isClub = set.first),
+            ),
+            const SizedBox(height: 24),
+            // Dynamic name fields based on role
+            if (_isClub)
+              CustonTextField(
+                controller: clubNameCtrl,
+                focusNode: FocusNode(),
+                label: 'Название клуба',
+                icon: Icons.business_center,
+                textInputType: TextInputType.text,
+              )
+            else
+              Column(
+                children: [
+                  CustonTextField(
+                    controller: firstNameCtrl,
+                    focusNode: FocusNode(),
+                    label: 'Имя',
+                    icon: Icons.person,
+                    textInputType: TextInputType.name,
+                  ),
+                  const SizedBox(height: 12),
+                  CustonTextField(
+                    controller: lastNameCtrl,
+                    focusNode: FocusNode(),
+                    label: 'Фамилия',
+                    icon: Icons.person_outline,
+                    textInputType: TextInputType.name,
+                  ),
+                ],
+              ),
+            const SizedBox(height: 12),
             CustonTextField(
               controller: emailCtrl,
-              focusNode: emailFocusNode,
+              focusNode: FocusNode(),
               label: 'Email',
               icon: Icons.email,
               textInputType: TextInputType.emailAddress,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             CustonTextField(
               controller: passCtrl,
-              focusNode: passFocusNode,
-              label: 'Password',
+              focusNode: FocusNode(),
+              label: 'Пароль (более 8 символов)',
               icon: Icons.lock,
               textInputType: TextInputType.visiblePassword,
               obscure: true,
             ),
-            const SizedBox(height: 32),
-            Row(
-              children: [
-                ElevatedButton.icon(
-                  onPressed: registerStudent,
-                  icon: const Icon(Icons.school),
-                  label: const Text('Register as Student'),
+            const SizedBox(height: 28),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: _isLoading ? null : _register,
+                icon: _isLoading
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Icon(_isClub ? Icons.business : Icons.school),
+                label: Text(
+                  _isClub ? 'Зарегистрироваться как клуб' : 'Зарегистрироваться как студент',
                 ),
-                const SizedBox(height: 12),
-                ElevatedButton.icon(
-                  onPressed: registerClub,
-                  icon: const Icon(Icons.business),
-                  label: const Text('Register as Club'),
-                ),
-              ],
+              ),
             ),
-
+            const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Already have an account?'),
+                const Text('Уже есть аккаунт?'),
                 TextButton(
                   onPressed: () => context.router.push(const LoginRoute()),
-                  child: const Text('Login'),
+                  child: const Text('Войти'),
                 ),
               ],
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

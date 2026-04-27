@@ -8,6 +8,7 @@ class MyEventsBloc extends Bloc<MyEventsEvent, MyEventsState> {
 
   MyEventsBloc(this.repository) : super(MyEventsInitial()) {
     on<LoadMyEvents>(_onLoad);
+    on<LoadClubEvents>(_onLoadClub);
     on<RemoveMyEvent>(_onRemove);
   }
 
@@ -24,13 +25,25 @@ class MyEventsBloc extends Bloc<MyEventsEvent, MyEventsState> {
     }
   }
 
+  Future<void> _onLoadClub(
+    LoadClubEvents event,
+    Emitter<MyEventsState> emit,
+  ) async {
+    emit(MyEventsLoading());
+    try {
+      final events = await repository.getEventsByClub(event.clubId);
+      emit(MyEventsLoaded(events));
+    } catch (e) {
+      emit(MyEventsError(e.toString()));
+    }
+  }
+
   Future<void> _onRemove(
     RemoveMyEvent event,
     Emitter<MyEventsState> emit,
   ) async {
     try {
       await repository.unregisterFromEvent(event.eventId);
-      // Reload after removal
       final events = await repository.getMyEvents();
       emit(MyEventsLoaded(events));
     } catch (e) {
