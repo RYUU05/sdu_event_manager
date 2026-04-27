@@ -15,8 +15,7 @@ service cloud.firestore {
       allow read: if true; // Everyone can read events
       allow create: if request.auth != null && 
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'club';
-      allow update: if request.auth != null && 
-        request.auth.uid == resource.data.clubId;
+      allow update: if request.auth != null;
       allow delete: if request.auth != null && 
         request.auth.uid == resource.data.clubId;
     }
