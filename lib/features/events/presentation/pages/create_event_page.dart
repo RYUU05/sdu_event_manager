@@ -22,6 +22,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
+  final _maxParticipantsController = TextEditingController();
 
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
@@ -45,6 +46,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
       _titleController.text = e.title;
       _descriptionController.text = e.description;
       _locationController.text = e.location;
+      _maxParticipantsController.text = e.maxParticipants > 0 ? e.maxParticipants.toString() : '';
       _selectedDate = e.date;
       _selectedTime = TimeOfDay.fromDateTime(e.date);
       if (_categories.contains(e.tags.isNotEmpty ? e.tags.first : 'Other')) {
@@ -60,6 +62,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
     _titleController.dispose();
     _descriptionController.dispose();
     _locationController.dispose();
+    _maxParticipantsController.dispose();
     super.dispose();
   }
 
@@ -114,6 +117,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
         'description': _descriptionController.text,
         'location': _locationController.text,
         'category': _selectedCategory,
+        'maxParticipants': int.tryParse(_maxParticipantsController.text) ?? 0,
         'dateTime': Timestamp.fromDate(dateTime),
         'clubId': authState.user.id,
         'clubName': authState.user.name,
@@ -133,6 +137,9 @@ class _CreateEventPageState extends State<CreateEventPage> {
         }
       } else {
         eventData['createdAt'] = FieldValue.serverTimestamp();
+        eventData['currentParticipants'] = 0;
+        eventData['participants'] = [];
+        
         await FirebaseFirestore.instance.collection('events').add(eventData);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -195,6 +202,15 @@ class _CreateEventPageState extends State<CreateEventPage> {
                       border: OutlineInputBorder(),
                     ),
                     validator: (v) => v!.isEmpty ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _maxParticipantsController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Max Participants (0 for unlimited)',
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
