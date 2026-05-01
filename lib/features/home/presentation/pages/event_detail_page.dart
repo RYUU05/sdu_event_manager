@@ -115,14 +115,11 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   onPressed: () => context.router.maybePop(),
                 ),
                 actions: [
-                  if (isClub && clubId == currentUserId)
+                  if (isClub && clubId == currentUserId) ...[
                     IconButton(
                       icon: const Icon(Icons.edit),
                       tooltip: 'Редактировать ивент',
                       onPressed: () {
-                        // Pass a dummy Event object or actually construct one
-                        // Since CreateEventRoute takes Event?, we need to pass it
-                        // For this we need to construct Event from data
                         final ev = Event(
                           id: widget.eventId,
                           title: title,
@@ -142,6 +139,53 @@ class _EventDetailPageState extends State<EventDetailPage> {
                         context.router.push(CreateEventRoute(eventToEdit: ev));
                       },
                     ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      tooltip: 'Удалить ивент',
+                      onPressed: () async {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Удалить ивент?'),
+                            content: const Text('Это действие нельзя отменить.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text('Отмена'),
+                              ),
+                              FilledButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                                child: const Text('Удалить'),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (confirm == true) {
+                          if (!context.mounted) return;
+                          setState(() => _isLoading = true);
+                          try {
+                            await _repo.deleteEvent(widget.eventId);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Ивент удален')),
+                              );
+                              context.router.maybePop();
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Ошибка удаления: $e')),
+                              );
+                            }
+                          } finally {
+                            if (mounted) setState(() => _isLoading = false);
+                          }
+                        }
+                      },
+                    ),
+                  ],
                 ],
                 flexibleSpace: FlexibleSpaceBar(
                   title: Text(

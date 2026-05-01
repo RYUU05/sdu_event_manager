@@ -15,6 +15,7 @@ abstract class FirebaseDataSource {
   Future<void> unfollowClub(String clubId, String userId);
   Future<List<EventModel>> getMyEvents(String userId);
   Stream<bool> isRegisteredForEvent(String eventId, String userId);
+  Future<void> deleteEvent(String eventId);
 }
 
 class FirebaseDataSourceImpl implements FirebaseDataSource {
@@ -230,5 +231,14 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
       final List<dynamic> registeredEvents = data['registeredEvents'] ?? [];
       return registeredEvents.contains(eventId);
     });
+  }
+
+  @override
+  Future<void> deleteEvent(String eventId) async {
+    try {
+      await firestore.collection('events').doc(eventId).delete();
+    } catch (e) {
+      throw Exception('Failed to delete event: $e');
+    }
   }
 }

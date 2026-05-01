@@ -76,4 +76,12 @@ class HomeRepositoryImpl implements HomeRepository {
     if (userId == null) return Stream.value(false);
     return dataSource.isRegisteredForEvent(eventId, userId);
   }
+
+  @override
+  Future<void> deleteEvent(String eventId) async {
+    final userId = auth.currentUser?.uid;
+    if (userId == null) throw Exception('User not authenticated');
+    // Security rules will ensure only the creator can delete it
+    await dataSource.deleteEvent(eventId);
+  }
 }
