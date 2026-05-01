@@ -138,9 +138,23 @@ class _CreateEventPageState extends State<CreateEventPage> {
       String finalImageUrl = _existingImageUrl ?? '';
       
       if (_selectedImage != null) {
-        final ref = FirebaseStorage.instance.ref().child('events').child('${DateTime.now().millisecondsSinceEpoch}.jpg');
-        await ref.putFile(_selectedImage!);
-        finalImageUrl = await ref.getDownloadURL();
+        if (!await _selectedImage!.exists()) {
+          throw Exception('Selected image file does not exist locally.');
+        }
+
+        final fileName = 'events/${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final ref = FirebaseStorage.instance.ref().child(fileName);
+        
+        final uploadTask = ref.putFile(_selectedImage!);
+        
+        // Wait for the upload task to completely finish
+        final snapshot = await uploadTask.whenComplete(() {});
+        
+        if (snapshot.state == TaskState.success) {
+          finalImageUrl = await snapshot.ref.getDownloadURL();
+        } else {
+          throw Exception('Upload failed. State: ${snapshot.state}. Check Firebase Storage Rules and ensure Storage is activated in Firebase Console.');
+        }
       }
 
       final eventData = {

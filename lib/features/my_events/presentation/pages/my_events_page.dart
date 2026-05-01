@@ -49,6 +49,15 @@ class _MyEventsView extends StatelessWidget {
   final bool isClub;
   const _MyEventsView({this.isClub = false});
 
+  void _refreshEvents(BuildContext context) {
+    final authState = context.read<AuthBloc>().state;
+    if (isClub && authState is Authenticated) {
+      context.read<MyEventsBloc>().add(LoadClubEvents(authState.user.id));
+    } else {
+      context.read<MyEventsBloc>().add(LoadMyEvents());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,17 +65,18 @@ class _MyEventsView extends StatelessWidget {
         title: Text(isClub ? 'Мои ивенты (клуб)' : 'Мои ивенты'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.filter_list),
+            tooltip: 'Фильтр',
             onPressed: () {
-              final authState = context.read<AuthBloc>().state;
-              if (isClub && authState is Authenticated) {
-                context
-                    .read<MyEventsBloc>()
-                    .add(LoadClubEvents(authState.user.id));
-              } else {
-                context.read<MyEventsBloc>().add(LoadMyEvents());
-              }
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Функция фильтрации в разработке')),
+              );
             },
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Обновить',
+            onPressed: () => _refreshEvents(context),
           ),
         ],
       ),
@@ -85,18 +95,10 @@ class _MyEventsView extends StatelessWidget {
                   const SizedBox(height: 12),
                   Text(state.message, textAlign: TextAlign.center),
                   const SizedBox(height: 16),
-                  FilledButton(
-                    onPressed: () {
-                      final authState = context.read<AuthBloc>().state;
-                      if (isClub && authState is Authenticated) {
-                        context
-                            .read<MyEventsBloc>()
-                            .add(LoadClubEvents(authState.user.id));
-                      } else {
-                        context.read<MyEventsBloc>().add(LoadMyEvents());
-                      }
-                    },
-                    child: const Text('Повторить'),
+                  FilledButton.icon(
+                    onPressed: () => _refreshEvents(context),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Повторить попытку'),
                   ),
                 ],
               ),
@@ -314,7 +316,7 @@ class _MyEventCard extends StatelessWidget {
 
   Widget _imagePlaceholder(BuildContext context) {
     return Container(
-      height: 100,
+      height: 140,
       width: double.infinity,
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: const Icon(Icons.event, size: 40, color: Colors.white54),
