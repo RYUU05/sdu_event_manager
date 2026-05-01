@@ -24,5 +24,7 @@
     "thirdNavBar": "Settings",
     "@thirdNavBar": {},
     "account": "Accont",
-    "@account": {}
+    "@account": {},
+    "myEvents": "My Events",
+    "@myEvents": {}
 }

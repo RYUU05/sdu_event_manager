@@ -21,10 +21,10 @@ class AppShell extends StatelessWidget {
               activeIcon: const Icon(Icons.home),
               label: context.localization.firstNavBar,
             ),
-            const BottomNavigationBarItem(
-              icon: Icon(Icons.bookmarks_outlined),
-              activeIcon: Icon(Icons.bookmarks),
-              label: 'Мои ивенты',
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.bookmarks_outlined),
+              activeIcon: const Icon(Icons.bookmarks),
+              label: context.localization.myEvents,
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.settings_outlined),

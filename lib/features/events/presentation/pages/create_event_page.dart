@@ -164,6 +164,10 @@ class _CreateEventPageState extends State<CreateEventPage> {
         }
       }
 
+      if (finalImageUrl.isEmpty) {
+        finalImageUrl = 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&q=80';
+      }
+
       final eventData = {
         'title': _titleController.text,
         'description': _descriptionController.text,

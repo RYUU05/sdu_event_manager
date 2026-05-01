@@ -104,7 +104,7 @@ class _HomePageState extends State<HomePage> {
                           crossAxisCount: 2,
                           crossAxisSpacing: 16,
                           mainAxisSpacing: 24,
-                          childAspectRatio: 0.65, // Adjust this to match the taller poster aspect ratio
+                          childAspectRatio: 0.65,
                         ),
                         itemCount: docs.length,
                         itemBuilder: (context, index) {

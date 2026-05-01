@@ -24,5 +24,7 @@
     "thirdNavBar": "Настройки",
     "@thirdNavBar": {},
     "account": "Аккаунт",
-    "@account": {}
+    "@account": {},
+    "myEvents": "Мои Ивенты",
+    "@myEvents": {}
 }

@@ -46,4 +46,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get account => 'Accont';
+
+  @override
+  String get myEvents => 'My Events';
 }

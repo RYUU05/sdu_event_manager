@@ -172,6 +172,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Accont'**
   String get account;
+
+  /// No description provided for @myEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'My Events'**
+  String get myEvents;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
