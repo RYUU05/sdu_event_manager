@@ -145,15 +145,22 @@ class _CreateEventPageState extends State<CreateEventPage> {
         final fileName = 'events/${DateTime.now().millisecondsSinceEpoch}.jpg';
         final ref = FirebaseStorage.instance.ref().child(fileName);
         
-        final uploadTask = ref.putFile(_selectedImage!);
+        final bytes = await _selectedImage!.readAsBytes();
+        final metadata = SettableMetadata(contentType: 'image/jpeg');
         
-        // Wait for the upload task to completely finish
+        // Use putData to avoid any iOS file path permission issues
+        final uploadTask = ref.putData(bytes, metadata);
+        
         final snapshot = await uploadTask.whenComplete(() {});
         
         if (snapshot.state == TaskState.success) {
-          finalImageUrl = await snapshot.ref.getDownloadURL();
+          try {
+            finalImageUrl = await snapshot.ref.getDownloadURL();
+          } catch (e) {
+            throw Exception('Upload succeeded but URL fetch failed: $e\nEnsure Firebase Storage is fully activated in your Firebase Console.');
+          }
         } else {
-          throw Exception('Upload failed. State: ${snapshot.state}. Check Firebase Storage Rules and ensure Storage is activated in Firebase Console.');
+          throw Exception('Upload failed. State: ${snapshot.state}. Check Firebase Storage Rules and ensure Storage is activated.');
         }
       }
 

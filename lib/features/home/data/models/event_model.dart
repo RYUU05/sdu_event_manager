@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/event.dart';
 
 class EventModel extends Event {
@@ -24,10 +25,12 @@ class EventModel extends Event {
       title: json['title'] ?? '',
       description: json['description'] ?? '',
       imageUrl: json['imageUrl'] ?? '',
-      date: DateTime.parse(json['date'] ?? DateTime.now().toIso8601String()),
-      registrationDeadline: DateTime.parse(
-        json['registrationDeadline'] ?? DateTime.now().toIso8601String(),
-      ),
+      date: (json['dateTime'] != null && json['dateTime'] is Timestamp)
+          ? (json['dateTime'] as Timestamp).toDate()
+          : DateTime.tryParse(json['date']?.toString() ?? '') ?? DateTime.now(),
+      registrationDeadline: (json['dateTime'] != null && json['dateTime'] is Timestamp)
+          ? (json['dateTime'] as Timestamp).toDate()
+          : DateTime.tryParse(json['registrationDeadline']?.toString() ?? '') ?? DateTime.now(),
       location: json['location'] ?? '',
       maxParticipants: json['maxParticipants'] ?? 0,
       currentParticipants: json['currentParticipants'] ?? 0,
