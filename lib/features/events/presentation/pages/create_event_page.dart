@@ -274,12 +274,12 @@ class _CreateEventPageState extends State<CreateEventPage> {
                       child: _selectedImage != null
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: Image.file(_selectedImage!, fit: BoxFit.cover),
+                              child: Image.file(_selectedImage!, fit: BoxFit.contain),
                             )
                           : _existingImageUrl != null && _existingImageUrl!.isNotEmpty
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(12),
-                                  child: Image.network(_existingImageUrl!, fit: BoxFit.cover),
+                                  child: Image.network(_existingImageUrl!, fit: BoxFit.contain),
                                 )
                               : const Column(
                                   mainAxisAlignment: MainAxisAlignment.center,

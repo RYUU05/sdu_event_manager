@@ -199,7 +199,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   background: imageUrl.isNotEmpty
                       ? Image.network(
                           imageUrl,
-                          fit: BoxFit.cover,
+                          fit: BoxFit.contain,
                           errorBuilder: (_, __, ___) =>
                               _buildPlaceholder(context),
                         )
