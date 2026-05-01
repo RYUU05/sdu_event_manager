@@ -97,86 +97,22 @@ class _HomePageState extends State<HomePage> {
 
                       const SizedBox(height: 12),
 
-                      ...docs.map((doc) {
-                        final data = doc.data() as Map<String, dynamic>;
-
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          clipBehavior: Clip.antiAlias,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: InkWell(
-                            onTap: () => context.router.push(
-                              EventDetailRoute(eventId: doc.id),
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (data['imageUrl'] != null && data['imageUrl'].toString().isNotEmpty)
-                                  Image.network(
-                                    data['imageUrl'],
-                                    width: 100,
-                                    height: 135,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => _buildImagePlaceholder(),
-                                  )
-                                else
-                                  _buildImagePlaceholder(),
-                                  
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          data['title'] ?? 'No title',
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(data['category'] ?? '', style: TextStyle(color: Colors.grey[800])),
-                                        Text(
-                                          data['location'] ?? '', 
-                                          maxLines: 1, 
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(color: Colors.grey[800]),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          data['dateTime'] != null
-                                              ? (data['dateTime'] as Timestamp)
-                                                    .toDate()
-                                                    .toString()
-                                                    .substring(0, 16)
-                                              : '',
-                                          style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Align(
-                                          alignment: Alignment.centerRight,
-                                          child: Text(
-                                            'Подробнее →',
-                                            style: TextStyle(
-                                              color: Theme.of(context).colorScheme.primary,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 24,
+                          childAspectRatio: 0.65, // Adjust this to match the taller poster aspect ratio
+                        ),
+                        itemCount: docs.length,
+                        itemBuilder: (context, index) {
+                          final doc = docs[index];
+                          final data = doc.data() as Map<String, dynamic>;
+                          return _buildEventGridCard(context, doc.id, data);
+                        },
+                      ),
 
                       const SizedBox(height: 20),
 
@@ -208,12 +144,79 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildImagePlaceholder() {
-    return Container(
-      width: 100,
-      height: 135,
-      color: Colors.grey[200],
-      child: const Icon(Icons.event, size: 40, color: Colors.grey),
+  Widget _buildEventGridCard(BuildContext context, String id, Map<String, dynamic> data) {
+    return GestureDetector(
+      onTap: () => context.router.push(EventDetailRoute(eventId: id)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Stack(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: Colors.grey[200],
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  width: double.infinity,
+                  child: (data['imageUrl'] != null && data['imageUrl'].toString().isNotEmpty)
+                      ? Image.network(
+                          data['imageUrl'],
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const Icon(Icons.event, color: Colors.grey, size: 40),
+                        )
+                      : const Icon(Icons.event, color: Colors.grey, size: 40),
+                ),
+                if (data['clubName'] != null && data['clubName'].toString().isNotEmpty)
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(230),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        data['clubName'],
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            data['title'] ?? 'No title',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            (data['category'] ?? '').toString().toUpperCase(),
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[600],
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 }
