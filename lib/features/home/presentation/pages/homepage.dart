@@ -110,43 +110,69 @@ class _HomePageState extends State<HomePage> {
                             onTap: () => context.router.push(
                               EventDetailRoute(eventId: doc.id),
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    data['title'] ?? 'No title',
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (data['imageUrl'] != null && data['imageUrl'].toString().isNotEmpty)
+                                  Image.network(
+                                    data['imageUrl'],
+                                    width: 100,
+                                    height: 135,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => _buildImagePlaceholder(),
+                                  )
+                                else
+                                  _buildImagePlaceholder(),
+                                  
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          data['title'] ?? 'No title',
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(data['category'] ?? '', style: TextStyle(color: Colors.grey[800])),
+                                        Text(
+                                          data['location'] ?? '', 
+                                          maxLines: 1, 
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(color: Colors.grey[800]),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          data['dateTime'] != null
+                                              ? (data['dateTime'] as Timestamp)
+                                                    .toDate()
+                                                    .toString()
+                                                    .substring(0, 16)
+                                              : '',
+                                          style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Align(
+                                          alignment: Alignment.centerRight,
+                                          child: Text(
+                                            'Подробнее →',
+                                            style: TextStyle(
+                                              color: Theme.of(context).colorScheme.primary,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  const SizedBox(height: 6),
-                                  Text(data['category'] ?? ''),
-                                  Text(data['location'] ?? ''),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    data['dateTime'] != null
-                                        ? (data['dateTime'] as Timestamp)
-                                              .toDate()
-                                              .toString()
-                                              .substring(0, 16)
-                                        : '',
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Text(
-                                      'Подробнее →',
-                                      style: TextStyle(
-                                        color: Theme.of(context).colorScheme.primary,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                         );
@@ -179,6 +205,15 @@ class _HomePageState extends State<HomePage> {
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildImagePlaceholder() {
+    return Container(
+      width: 100,
+      height: 135,
+      color: Colors.grey[200],
+      child: const Icon(Icons.event, size: 40, color: Colors.grey),
     );
   }
 }
