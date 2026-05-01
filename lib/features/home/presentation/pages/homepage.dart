@@ -163,7 +163,7 @@ class _HomePageState extends State<HomePage> {
                   child: (data['imageUrl'] != null && data['imageUrl'].toString().isNotEmpty)
                       ? Image.network(
                           data['imageUrl'],
-                          fit: BoxFit.contain,
+                          fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => const Icon(Icons.event, color: Colors.grey, size: 40),
                         )
                       : const Icon(Icons.event, color: Colors.grey, size: 40),

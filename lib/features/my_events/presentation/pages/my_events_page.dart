@@ -198,7 +198,7 @@ class _MyEventCard extends StatelessWidget {
                 event.imageUrl,
                 height: 140,
                 width: double.infinity,
-                fit: BoxFit.contain,
+                fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => _imagePlaceholder(context),
               )
             else
