@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/providers/language_provider.dart';
 import '../../../../core/router/app_router.gr.dart';
+import '../../../../core/di/injection.dart';
 import '../../../auth/presentation/bloc/auth_bloc_simple.dart';
-import '../../data/datasources/settings_data_source.dart';
-import '../../data/repositories/settings_repository_impl.dart';
 import '../bloc/settings_bloc.dart';
 
 @RoutePage(name: 'SettingsRoute')
@@ -23,9 +22,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    final dataSource = SettingsDataSource();
-    final repository = SettingsRepositoryImpl(dataSource);
-    settingsBloc = SettingsBloc(repository, context.read<AuthBloc>());
+    settingsBloc = getIt<SettingsBloc>();
     settingsBloc.add(LoadSettingsEvent());
   }
 
@@ -69,6 +66,14 @@ class _SettingsPageState extends State<SettingsPage> {
                 settingsBloc.add(LanguageEvent('ru'));
                 Navigator.pop(ctx);
               },
+            ListTile(
+              title: const Text('Қазақша'),
+              trailing: currentLang == 'kk' ? const Icon(Icons.check) : null,
+              onTap: () {
+                provider.changeLanguage('kk');
+                settingsBloc.add(LanguageEvent('kk'));
+                Navigator.pop(ctx);
+              },
             ),
           ],
         ),
@@ -106,7 +111,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     leading: const Icon(Icons.language),
                     title: Text(context.localization.language),
                     subtitle: Text(
-                      languageProvider.locale.languageCode == 'en' ? 'English' : 'Русский',
+                      languageProvider.locale.languageCode == 'en' 
+                          ? 'English' 
+                          : languageProvider.locale.languageCode == 'kk'
+                              ? 'Қазақша'
+                              : 'Русский',
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => _showLanguageDialog(

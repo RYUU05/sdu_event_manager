@@ -5,13 +5,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:auto_route/auto_route.dart';
 
 import '../../../../core/router/app_router.gr.dart';
+import '../../../../core/di/injection.dart';
 import '../../../auth/presentation/bloc/auth_bloc_simple.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
 import '../bloc/home_state.dart';
 import '../widgets/club_card.dart';
-import 'home_page_injection.dart';
 
 @RoutePage(name: 'HomeRoute')
 class HomePage extends StatefulWidget {
@@ -34,7 +34,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _homeBloc = HomePageInjection.createHomeBloc();
+    _homeBloc = getIt<HomeBloc>();
     _homeBloc.add(const LoadHomeData());
   }
 

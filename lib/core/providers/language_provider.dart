@@ -21,15 +21,13 @@ class LanguageProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> changeLanguage(String languageCode) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_languageKey, languageCode);
-      _locale = Locale(languageCode);
+  Future<void> changeLanguage(String langCode) async {
+    if (['en', 'ru', 'kk'].contains(langCode)) {
+      _locale = Locale(langCode);
       notifyListeners();
-      debugPrint('Language changed to: $languageCode');
-    } catch (e) {
-      debugPrint('Error changing language: $e');
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_languageKey, langCode);
+      debugPrint('Language changed to: $langCode');
     }
   }
 

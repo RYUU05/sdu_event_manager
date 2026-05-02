@@ -1,0 +1,15 @@
+{
+  "@@locale": "kk",
+  "appTitle": "SDU Events",
+  "comingEvents": "Алдағы іс-шаралар",
+  "popularClubs": "Танымал клубтар",
+  "myEvents": "Менің іс-шараларым",
+  "settings": "Баптаулар",
+  "account": "Аккаунт",
+  "language": "Тіл",
+  "logout": "Шығу",
+  "selectingLang": "Тілді таңдаңыз",
+  "english": "Ағылшын тілі",
+  "russian": "Орыс тілі",
+  "create_event": "Іс-шара құру"
+}

@@ -9,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/di/injection.dart';
 
 import '../../../../core/router/app_router.gr.dart';
 import '../bloc/my_events_bloc.dart';
@@ -20,13 +21,7 @@ class MyEventsPage extends StatelessWidget {
   const MyEventsPage({super.key});
 
   static MyEventsBloc _createBloc() {
-    final auth = FirebaseAuth.instance;
-    final dataSource = FirebaseDataSourceImpl(
-      firestore: FirebaseFirestore.instance,
-      userId: auth.currentUser?.uid ?? '',
-    );
-    final repo = HomeRepositoryImpl(dataSource: dataSource, auth: auth);
-    return MyEventsBloc(repo);
+    return getIt<MyEventsBloc>();
   }
 
   @override
