@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:event_manager/features/auth/presentation/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../domain/entities/user_entity.dart';
 import '../../../../core/router/app_router.gr.dart';
 import '../bloc/auth_bloc_simple.dart';
 

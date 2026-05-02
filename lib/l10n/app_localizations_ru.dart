@@ -49,4 +49,67 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get myEvents => 'Мои Ивенты';
+
+  @override
+  String get myEventsClub => 'Мои ивенты (клуб)';
+  @override
+  String get filter => 'Фильтр';
+  @override
+  String get refresh => 'Обновить';
+  @override
+  String get retry => 'Повторить попытку';
+  @override
+  String get noCreatedEvents => 'Нет созданных ивентов';
+  @override
+  String get noRegisteredEvents => 'Нет записанных ивентов';
+  @override
+  String get createEventPrompt => 'Создайте ивент, и он появится здесь';
+  @override
+  String get registerEventPrompt => 'Нажмите «Участвовать» на ивенте,\nчтобы он появился здесь';
+  @override
+  String get findEvents => 'Найти ивенты';
+  @override
+  String get yourEvent => 'Ваш ивент';
+  @override
+  String get youAreRegistered => 'Вы записаны';
+  @override
+  String get removeFromMyEvents => 'Убрать из моих ивентов';
+  @override
+  String get removeEvent => 'Убрать ивент?';
+  @override
+  String get cancelParticipationPrompt => 'Вы отмените участие в этом ивенте.';
+  @override
+  String get remove => 'Убрать';
+  @override
+  String get allCategories => 'Все категории';
+  @override
+  String get selectCategory => 'Выберите категорию';
+
+  @override
+  String get catAcademic => 'Академические';
+  @override
+  String get catSports => 'Спорт';
+  @override
+  String get catCulture => 'Культура';
+  @override
+  String get catSocial => 'Социальные';
+  @override
+  String get catCareer => 'Карьера';
+  @override
+  String get catOther => 'Другое';
+
+  @override
+  String get searchEvents => 'Поиск ивентов...';
+  @override
+  String get nothingFound => 'Ничего не найдено';
+  @override
+  String get noEventsYet => 'Ивентов пока нет';
+  @override
+  String get resetFilters => 'Сбросить фильтры';
+  @override
+  String get all => 'Все';
+  @override
+  String get errorLabel => 'Ошибка';
+  @override
+  String get noTitle => 'Без названия';
 }

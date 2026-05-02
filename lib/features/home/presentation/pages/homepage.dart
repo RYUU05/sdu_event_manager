@@ -51,6 +51,25 @@ class _HomePageState extends State<HomePage> {
     await Future.delayed(const Duration(milliseconds: 600));
   }
 
+  String _getCategoryName(BuildContext context, String category) {
+    switch (category) {
+      case 'Academic':
+        return context.localization.catAcademic;
+      case 'Sports':
+        return context.localization.catSports;
+      case 'Culture':
+        return context.localization.catCulture;
+      case 'Social':
+        return context.localization.catSocial;
+      case 'Career':
+        return context.localization.catCareer;
+      case 'Other':
+        return context.localization.catOther;
+      default:
+        return category;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
@@ -84,7 +103,7 @@ class _HomePageState extends State<HomePage> {
                 controller: _searchCtrl,
                 onChanged: (v) => setState(() => _searchQuery = v.trim()),
                 decoration: InputDecoration(
-                  hintText: 'Поиск ивентов...',
+                  hintText: context.localization.searchEvents,
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
@@ -119,7 +138,7 @@ class _HomePageState extends State<HomePage> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: FilterChip(
-                      label: const Text('Все'),
+                      label: Text(context.localization.all),
                       selected: _selectedCategory == null,
                       onSelected: (_) =>
                           setState(() => _selectedCategory = null),
@@ -129,7 +148,7 @@ class _HomePageState extends State<HomePage> {
                         padding:
                             const EdgeInsets.symmetric(horizontal: 4),
                         child: FilterChip(
-                          label: Text(cat),
+                          label: Text(_getCategoryName(context, cat)),
                           selected: _selectedCategory == cat,
                           onSelected: (sel) => setState(
                               () => _selectedCategory = sel ? cat : null),
@@ -162,7 +181,7 @@ class _HomePageState extends State<HomePage> {
                           FilledButton.icon(
                             onPressed: _refresh,
                             icon: const Icon(Icons.refresh),
-                            label: const Text('Повторить'),
+                            label: Text(context.localization.retry),
                           ),
                         ],
                       ),
@@ -182,7 +201,7 @@ class _HomePageState extends State<HomePage> {
                       builder: (context, snapshot) {
                         if (snapshot.hasError) {
                           return Center(
-                              child: Text('Ошибка: ${snapshot.error}'));
+                              child: Text('${context.localization.errorLabel}: ${snapshot.error}'));
                         }
 
                         final allDocs = snapshot.data?.docs ?? [];
@@ -304,8 +323,8 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 16),
           Text(
             _searchQuery.isNotEmpty || _selectedCategory != null
-                ? 'Ничего не найдено'
-                : 'Ивентов пока нет',
+                ? context.localization.nothingFound
+                : context.localization.noEventsYet,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: Colors.grey[600],
                 ),
@@ -318,7 +337,7 @@ class _HomePageState extends State<HomePage> {
                 _searchCtrl.clear();
                 _selectedCategory = null;
               }),
-              child: const Text('Сбросить фильтры'),
+              child: Text(context.localization.resetFilters),
             ),
           ],
         ],
@@ -386,7 +405,7 @@ class _HomePageState extends State<HomePage> {
           ),
           const SizedBox(height: 8),
           Text(
-            data['title'] ?? 'Без названия',
+            data['title'] ?? context.localization.noTitle,
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
@@ -397,7 +416,7 @@ class _HomePageState extends State<HomePage> {
           ),
           const SizedBox(height: 2),
           Text(
-            (data['category'] ?? '').toString().toUpperCase(),
+            _getCategoryName(context, (data['category'] ?? '').toString()).toUpperCase(),
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,

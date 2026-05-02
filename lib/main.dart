@@ -7,7 +7,6 @@ import 'core/di/injection.dart';
 import 'core/providers/language_provider.dart';
 import 'core/router/app_router.dart';
 import 'features/auth/presentation/bloc/auth_bloc_simple.dart';
-import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'firebase_options.dart';
 import 'l10n/app_localizations.dart';
 

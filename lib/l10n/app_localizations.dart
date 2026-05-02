@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
+import 'app_localizations_kk.dart';
 import 'app_localizations_ru.dart';
 
 // ignore_for_file: type=lint
@@ -92,6 +93,7 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
+    Locale('kk'),
     Locale('ru')
   ];
 
@@ -178,6 +180,61 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'My Events'**
   String get myEvents;
+
+  String get myEventsClub;
+  String get filter;
+  String get refresh;
+  String get retry;
+  String get noCreatedEvents;
+  String get noRegisteredEvents;
+  String get createEventPrompt;
+  String get registerEventPrompt;
+  String get findEvents;
+  String get yourEvent;
+  String get youAreRegistered;
+  String get removeFromMyEvents;
+  String get removeEvent;
+  String get cancelParticipationPrompt;
+  String get remove;
+  String get allCategories;
+  String get selectCategory;
+
+  String get catAcademic;
+  String get catSports;
+  String get catCulture;
+  String get catSocial;
+  String get catCareer;
+  String get catOther;
+
+  String get searchEvents;
+  String get nothingFound;
+  String get noEventsYet;
+  String get resetFilters;
+  String get all;
+  String get errorLabel;
+  String get noTitle;
+
+  String get editEvent;
+  String get eventTitle;
+  String get description;
+  String get location;
+  String get maxParticipants;
+  String get categoryLabel;
+  String get requiredField;
+  String get enterInteger;
+  String get cannotBeNegative;
+  String get selectCategoryPrompt;
+  String get addPosterPrompt;
+  String get selectDate;
+  String get selectTime;
+  String get saving;
+  String get creating;
+  String get save;
+  String get onlyClubsCreate;
+  String get imageError;
+  String get selectDateTimePrompt;
+  String get eventUpdated;
+  String get eventCreated;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
@@ -189,7 +246,7 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'ru'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'kk', 'ru'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -201,6 +258,7 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
     case 'en': return AppLocalizationsEn();
+    case 'kk': return AppLocalizationsKk();
     case 'ru': return AppLocalizationsRu();
   }
 

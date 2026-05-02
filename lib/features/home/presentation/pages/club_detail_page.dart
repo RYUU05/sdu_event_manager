@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/router/app_router.gr.dart';
+import '../../../auth/domain/entities/user_entity.dart';
 
 @RoutePage(name: 'ClubDetailRoute')
 class ClubDetailPage extends StatefulWidget {
@@ -64,7 +65,6 @@ class _ClubDetailPageState extends State<ClubDetailPage> {
     final authState = context.watch<AuthBloc>().state;
     final isStudent =
         authState is Authenticated && authState.user.role == UserRole.student;
-    final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
     return Scaffold(
       body: StreamBuilder<DocumentSnapshot>(

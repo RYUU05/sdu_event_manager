@@ -339,7 +339,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
 
                   // Category
                   DropdownButtonFormField<String>(
-                    value: _selectedCategory,
+                    initialValue: _selectedCategory,
                     decoration: const InputDecoration(
                       labelText: 'Категория *',
                       border: OutlineInputBorder(),

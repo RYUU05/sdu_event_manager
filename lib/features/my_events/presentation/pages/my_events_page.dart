@@ -1,11 +1,7 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:event_manager/features/auth/domain/entities/user_entity.dart';
 import 'package:event_manager/features/auth/presentation/bloc/auth_bloc_simple.dart';
-import 'package:event_manager/features/home/data/datasources/firebase_data_source.dart';
-import 'package:event_manager/features/home/data/repositories/home_repository_impl.dart';
 import 'package:event_manager/features/home/domain/entities/event.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -40,37 +36,115 @@ class MyEventsPage extends StatelessWidget {
   }
 }
 
-class _MyEventsView extends StatelessWidget {
+class _MyEventsView extends StatefulWidget {
   final bool isClub;
   const _MyEventsView({this.isClub = false});
 
+  @override
+  State<_MyEventsView> createState() => _MyEventsViewState();
+}
+
+class _MyEventsViewState extends State<_MyEventsView> {
+  String? _selectedCategory;
+
+  final List<String> _categories = [
+    'Academic',
+    'Sports',
+    'Culture',
+    'Social',
+    'Career',
+    'Other'
+  ];
+
+  String _getCategoryName(BuildContext context, String category) {
+    switch (category) {
+      case 'Academic':
+        return context.localization.catAcademic;
+      case 'Sports':
+        return context.localization.catSports;
+      case 'Culture':
+        return context.localization.catCulture;
+      case 'Social':
+        return context.localization.catSocial;
+      case 'Career':
+        return context.localization.catCareer;
+      case 'Other':
+        return context.localization.catOther;
+      default:
+        return category;
+    }
+  }
+
   void _refreshEvents(BuildContext context) {
     final authState = context.read<AuthBloc>().state;
-    if (isClub && authState is Authenticated) {
+    if (widget.isClub && authState is Authenticated) {
       context.read<MyEventsBloc>().add(LoadClubEvents(authState.user.id));
     } else {
       context.read<MyEventsBloc>().add(LoadMyEvents());
     }
   }
 
+  void _showFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.localization.selectCategory),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text(context.localization.allCategories),
+              leading: Radio<String?>(
+                value: null,
+                groupValue: _selectedCategory,
+                onChanged: (value) {
+                  setState(() => _selectedCategory = value);
+                  Navigator.pop(context);
+                },
+              ),
+              onTap: () {
+                setState(() => _selectedCategory = null);
+                Navigator.pop(context);
+              },
+            ),
+            ..._categories.map((category) => ListTile(
+                  title: Text(_getCategoryName(context, category)),
+                  leading: Radio<String?>(
+                    value: category,
+                    groupValue: _selectedCategory,
+                    onChanged: (value) {
+                      setState(() => _selectedCategory = value);
+                      Navigator.pop(context);
+                    },
+                  ),
+                  onTap: () {
+                    setState(() => _selectedCategory = category);
+                    Navigator.pop(context);
+                  },
+                )),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(isClub ? 'Мои ивенты (клуб)' : 'Мои ивенты'),
+        title: Text(widget.isClub ? context.localization.myEventsClub : context.localization.myEvents),
         actions: [
           IconButton(
-            icon: const Icon(Icons.filter_list),
-            tooltip: 'Фильтр',
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Функция фильтрации в разработке')),
-              );
-            },
+            icon: Icon(
+              Icons.filter_list,
+              color: _selectedCategory != null ? Theme.of(context).colorScheme.primary : null,
+            ),
+            tooltip: context.localization.filter,
+            onPressed: _showFilterDialog,
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
-            tooltip: 'Обновить',
+            tooltip: context.localization.refresh,
             onPressed: () => _refreshEvents(context),
           ),
         ],
@@ -93,7 +167,7 @@ class _MyEventsView extends StatelessWidget {
                   FilledButton.icon(
                     onPressed: () => _refreshEvents(context),
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Повторить попытку'),
+                    label: Text(context.localization.retry),
                   ),
                 ],
               ),
@@ -101,19 +175,23 @@ class _MyEventsView extends StatelessWidget {
           }
 
           if (state is MyEventsLoaded) {
-            if (state.events.isEmpty) {
-              return _EmptyState(isClub: isClub);
+            final filteredEvents = _selectedCategory == null
+                ? state.events
+                : state.events.where((e) => e.category == _selectedCategory).toList();
+
+            if (filteredEvents.isEmpty) {
+              return _EmptyState(isClub: widget.isClub, hasFilter: _selectedCategory != null);
             }
 
             return RefreshIndicator(
               onRefresh: () async => _refreshEvents(context),
               child: ListView.separated(
                 padding: const EdgeInsets.all(16),
-                itemCount: state.events.length,
+                itemCount: filteredEvents.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
-                  final event = state.events[index];
-                  return _MyEventCard(event: event, isClub: isClub);
+                  final event = filteredEvents[index];
+                  return _MyEventCard(event: event, isClub: widget.isClub);
                 },
               ),
             );
@@ -128,7 +206,8 @@ class _MyEventsView extends StatelessWidget {
 
 class _EmptyState extends StatelessWidget {
   final bool isClub;
-  const _EmptyState({this.isClub = false});
+  final bool hasFilter;
+  const _EmptyState({this.isClub = false, this.hasFilter = false});
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +222,7 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            isClub ? 'Нет созданных ивентов' : 'Нет записанных ивентов',
+            isClub ? context.localization.noCreatedEvents : context.localization.noRegisteredEvents,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: Colors.grey[600],
                 ),
@@ -151,19 +230,19 @@ class _EmptyState extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             isClub
-                ? 'Создайте ивент, и он появится здесь'
-                : 'Нажмите «Участвовать» на ивенте,\nчтобы он появился здесь',
+                ? context.localization.createEventPrompt
+                : context.localization.registerEventPrompt,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.grey[400],
                 ),
           ),
           const SizedBox(height: 24),
-          if (!isClub)
+          if (!isClub && !hasFilter)
             FilledButton.icon(
               onPressed: () => context.router.navigate(const HomeRoute()),
               icon: const Icon(Icons.search),
-              label: const Text('Найти ивенты'),
+              label: Text(context.localization.findEvents),
             ),
         ],
       ),
@@ -289,7 +368,7 @@ class _MyEventCard extends StatelessWidget {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              isClub ? 'Ваш ивент' : 'Вы записаны',
+                              isClub ? context.localization.yourEvent : context.localization.youAreRegistered,
                               style: TextStyle(
                                 color: isClub
                                     ? Colors.blue[700]
@@ -344,28 +423,28 @@ class _RemoveButtonState extends State<_RemoveButton> {
               child: CircularProgressIndicator(strokeWidth: 2),
             )
           : const Icon(Icons.delete_outline, color: Colors.red),
-      tooltip: 'Убрать из моих ивентов',
+      tooltip: context.localization.removeFromMyEvents,
       onPressed: _loading
           ? null
           : () async {
               final confirmed = await showDialog<bool>(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  title: const Text('Убрать ивент?'),
-                  content: const Text(
-                    'Вы отмените участие в этом ивенте.',
+                  title: Text(context.localization.removeEvent),
+                  content: Text(
+                    context.localization.cancelParticipationPrompt,
                   ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(ctx, false),
-                      child: const Text('Отмена'),
+                      child: Text(context.localization.cancel),
                     ),
                     FilledButton(
                       onPressed: () => Navigator.pop(ctx, true),
                       style: FilledButton.styleFrom(
                         backgroundColor: Colors.red,
                       ),
-                      child: const Text('Убрать'),
+                      child: Text(context.localization.remove),
                     ),
                   ],
                 ),

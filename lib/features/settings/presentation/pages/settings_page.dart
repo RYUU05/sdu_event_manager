@@ -66,6 +66,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 settingsBloc.add(LanguageEvent('ru'));
                 Navigator.pop(ctx);
               },
+            ),
             ListTile(
               title: const Text('Қазақша'),
               trailing: currentLang == 'kk' ? const Icon(Icons.check) : null,
