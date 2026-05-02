@@ -67,7 +67,7 @@ class Event {
 
   bool get isRegistrationOpen =>
       DateTime.now().isBefore(registrationDeadline) &&
-      currentParticipants < maxParticipants;
+      (maxParticipants == 0 || currentParticipants < maxParticipants);
 
   double get registrationPercentage =>
       maxParticipants > 0 ? currentParticipants / maxParticipants : 0.0;

@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:event_manager/features/auth/domain/entities/user_entity.dart';
 import 'package:event_manager/features/auth/domain/repositories/auth_repository.dart';
 
+// ─── Events ────────────────────────────────────────────────────────────────
+
 abstract class AuthEvent {}
 
 class LoginRequested extends AuthEvent {
@@ -26,6 +28,13 @@ class UserChanged extends AuthEvent {
   UserChanged(this.user);
 }
 
+class ResetPasswordRequested extends AuthEvent {
+  final String email;
+  ResetPasswordRequested(this.email);
+}
+
+// ─── States ────────────────────────────────────────────────────────────────
+
 abstract class AuthState {}
 
 class AuthInitial extends AuthState {}
@@ -44,6 +53,10 @@ class AuthError extends AuthState {
   AuthError(this.message);
 }
 
+class PasswordResetSent extends AuthState {}
+
+// ─── Bloc ──────────────────────────────────────────────────────────────────
+
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository _repo;
   StreamSubscription<UserEntity?>? _sub;
@@ -53,6 +66,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<RegisterRequested>(_onRegister);
     on<LogoutRequested>(_onLogout);
     on<UserChanged>(_onUserChanged);
+    on<ResetPasswordRequested>(_onResetPassword);
 
     _sub = _repo.user.listen((user) => add(UserChanged(user)));
   }
@@ -63,7 +77,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (user != null) {
       emit(Authenticated(user));
     } else {
-      emit(AuthError('Login failed'));
+      emit(AuthError('Неверный email или пароль'));
     }
   }
 
@@ -81,7 +95,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (user != null) {
       emit(Authenticated(user));
     } else {
-      emit(AuthError('Registration failed'));
+      emit(AuthError('Ошибка регистрации. Проверьте данные.'));
     }
   }
 
@@ -95,6 +109,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(Authenticated(event.user!));
     } else {
       emit(Unauthenticated());
+    }
+  }
+
+  Future<void> _onResetPassword(
+    ResetPasswordRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      await _repo.resetPassword(event.email);
+      emit(PasswordResetSent());
+    } catch (e) {
+      emit(AuthError('Ошибка отправки письма. Проверьте email.'));
     }
   }
 

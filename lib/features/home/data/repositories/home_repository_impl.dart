@@ -28,14 +28,14 @@ class HomeRepositoryImpl implements HomeRepository {
   @override
   Future<void> registerForEvent(String eventId) async {
     final userId = auth.currentUser?.uid;
-    if (userId == null) throw Exception('User not authenticated');
+    if (userId == null) throw Exception('Пользователь не авторизован');
     await dataSource.registerForEvent(eventId, userId);
   }
 
   @override
   Future<void> unregisterFromEvent(String eventId) async {
     final userId = auth.currentUser?.uid;
-    if (userId == null) throw Exception('User not authenticated');
+    if (userId == null) throw Exception('Пользователь не авторизован');
     await dataSource.unregisterFromEvent(eventId, userId);
   }
 
@@ -52,21 +52,21 @@ class HomeRepositoryImpl implements HomeRepository {
   @override
   Future<void> followClub(String clubId) async {
     final userId = auth.currentUser?.uid;
-    if (userId == null) throw Exception('User not authenticated');
+    if (userId == null) throw Exception('Пользователь не авторизован');
     await dataSource.followClub(clubId, userId);
   }
 
   @override
   Future<void> unfollowClub(String clubId) async {
     final userId = auth.currentUser?.uid;
-    if (userId == null) throw Exception('User not authenticated');
+    if (userId == null) throw Exception('Пользователь не авторизован');
     await dataSource.unfollowClub(clubId, userId);
   }
 
   @override
   Future<List<Event>> getMyEvents() async {
     final userId = auth.currentUser?.uid;
-    if (userId == null) throw Exception('User not authenticated');
+    if (userId == null) throw Exception('Пользователь не авторизован');
     return await dataSource.getMyEvents(userId);
   }
 
@@ -78,10 +78,16 @@ class HomeRepositoryImpl implements HomeRepository {
   }
 
   @override
+  Stream<bool> isFollowingClub(String clubId) {
+    final userId = auth.currentUser?.uid;
+    if (userId == null) return Stream.value(false);
+    return dataSource.isFollowingClub(clubId, userId);
+  }
+
+  @override
   Future<void> deleteEvent(String eventId) async {
     final userId = auth.currentUser?.uid;
-    if (userId == null) throw Exception('User not authenticated');
-    // Security rules will ensure only the creator can delete it
+    if (userId == null) throw Exception('Пользователь не авторизован');
     await dataSource.deleteEvent(eventId);
   }
 }

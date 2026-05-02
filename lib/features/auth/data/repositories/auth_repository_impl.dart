@@ -52,20 +52,40 @@ class AuthRepositoryImpl implements AuthRepository {
 
       if (result.user == null) return null;
 
-      await _db.collection('users').doc(result.user!.uid).set({
+      final uid = result.user!.uid;
+      final roleStr = role == UserRole.club ? 'club' : 'student';
+
+      // Always create user doc
+      await _db.collection('users').doc(uid).set({
         'email': email,
         'name': name,
-        'role': role == UserRole.club ? 'club' : 'student',
+        'role': roleStr,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
+      // If club — also create entry in clubs collection
+      if (role == UserRole.club) {
+        await _db.collection('clubs').doc(uid).set({
+          'name': name,
+          'description': '',
+          'imageUrl': '',
+          'category': 'Клуб',
+          'memberCount': 0,
+          'rating': 0.0,
+          'tags': <String>[],
+          'ownerId': uid,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+
       return UserEntity(
-        id: result.user!.uid,
+        id: uid,
         email: email,
         name: name,
         role: role,
       );
     } catch (e) {
+      debugPrint('Register error: $e');
       return null;
     }
   }
@@ -88,7 +108,7 @@ class AuthRepositoryImpl implements AuthRepository {
       return UserEntity(
         id: user.uid,
         email: user.email ?? '',
-        name: doc.data()?['name'],
+        name: doc.data()?['name'] ?? user.email ?? '',
         role: role,
       );
     } catch (e) {
@@ -109,12 +129,17 @@ class AuthRepositoryImpl implements AuthRepository {
         return UserEntity(
           id: user.uid,
           email: user.email ?? '',
-          name: doc.data()?['name'],
+          name: doc.data()?['name'] ?? user.email ?? '',
           role: role,
         );
       } catch (e) {
         return null;
       }
     });
+  }
+
+  @override
+  Future<void> resetPassword(String email) async {
+    await _auth.sendPasswordResetEmail(email: email.trim());
   }
 }

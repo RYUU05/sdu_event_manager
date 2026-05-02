@@ -15,7 +15,13 @@ abstract class FirebaseDataSource {
   Future<void> unfollowClub(String clubId, String userId);
   Future<List<EventModel>> getMyEvents(String userId);
   Stream<bool> isRegisteredForEvent(String eventId, String userId);
+  Stream<bool> isFollowingClub(String clubId, String userId);
   Future<void> deleteEvent(String eventId);
+}
+
+/// Helper to safely add 'id' to a Firestore map without mutating original.
+Map<String, dynamic> _withId(Map<String, dynamic> data, String id) {
+  return {...data, 'id': id};
 }
 
 class FirebaseDataSourceImpl implements FirebaseDataSource {
@@ -27,23 +33,32 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
   @override
   Future<List<EventModel>> getAllEvents() async {
     try {
-      final snapshot = await firestore.collection('events').get();
+      final snapshot = await firestore
+          .collection('events')
+          .orderBy('dateTime', descending: false)
+          .get();
       return snapshot.docs
-          .map((doc) => EventModel.fromJson(doc.data()..['id'] = doc.id))
+          .map((doc) => EventModel.fromJson(_withId(doc.data(), doc.id)))
           .toList();
     } catch (e) {
-      throw Exception('Failed to fetch all events: $e');
+      // Fallback without ordering if index not set up
+      try {
+        final snapshot = await firestore.collection('events').get();
+        return snapshot.docs
+            .map((doc) => EventModel.fromJson(_withId(doc.data(), doc.id)))
+            .toList();
+      } catch (e2) {
+        throw Exception('Failed to fetch all events: $e2');
+      }
     }
   }
 
   @override
   Future<List<EventModel>> getUpcomingEvents() async {
     try {
-      // Simple query without orderBy to avoid index requirement
       final snapshot = await firestore.collection('events').limit(10).get();
-
       return snapshot.docs
-          .map((doc) => EventModel.fromJson(doc.data()..['id'] = doc.id))
+          .map((doc) => EventModel.fromJson(_withId(doc.data(), doc.id)))
           .toList();
     } catch (e) {
       throw Exception('Failed to fetch upcoming events: $e');
@@ -53,11 +68,9 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
   @override
   Future<List<ClubModel>> getPopularClubs() async {
     try {
-      // Simple query without orderBy to avoid index requirement
       final snapshot = await firestore.collection('clubs').limit(10).get();
-
       return snapshot.docs
-          .map((doc) => ClubModel.fromJson(doc.data()..['id'] = doc.id))
+          .map((doc) => ClubModel.fromJson(_withId(doc.data(), doc.id)))
           .toList();
     } catch (e) {
       throw Exception('Failed to fetch popular clubs: $e');
@@ -69,24 +82,23 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
     final eventRef = firestore.collection('events').doc(eventId);
     final userRef = firestore.collection('users').doc(userId);
 
-    // 1. Add event to user's registeredEvents array
     try {
-      await userRef.set({
-        'registeredEvents': FieldValue.arrayUnion([eventId])
-      }, SetOptions(merge: true));
+      await userRef.set(
+        {'registeredEvents': FieldValue.arrayUnion([eventId])},
+        SetOptions(merge: true),
+      );
     } catch (e) {
-      throw Exception('Update user document failed: $e');
+      throw Exception('Не удалось обновить данные пользователя: $e');
     }
 
-    // 2. Update participant counts and add user to event's participants array
     try {
       await eventRef.update({
         'currentParticipants': FieldValue.increment(1),
         'participants': FieldValue.arrayUnion([userId]),
       });
     } catch (e) {
-      debugPrint('Update event document failed (check Firestore Rules): $e');
-      throw Exception('Ошибка доступа к Firebase. Обновите Firestore Rules!');
+      debugPrint('Update event failed (check Firestore Rules): $e');
+      throw Exception('Ошибка доступа к Firebase. Проверьте Firestore Rules!');
     }
   }
 
@@ -95,24 +107,23 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
     final eventRef = firestore.collection('events').doc(eventId);
     final userRef = firestore.collection('users').doc(userId);
 
-    // 1. Remove from user's registeredEvents array
     try {
-      await userRef.set({
-        'registeredEvents': FieldValue.arrayRemove([eventId])
-      }, SetOptions(merge: true));
+      await userRef.set(
+        {'registeredEvents': FieldValue.arrayRemove([eventId])},
+        SetOptions(merge: true),
+      );
     } catch (e) {
-      throw Exception('Update user document failed: $e');
+      throw Exception('Не удалось обновить данные пользователя: $e');
     }
 
-    // 2. Update participant counts and remove user from event's participants array
     try {
       await eventRef.update({
         'currentParticipants': FieldValue.increment(-1),
         'participants': FieldValue.arrayRemove([userId]),
       });
     } catch (e) {
-      debugPrint('Update event document failed (check Firestore Rules): $e');
-      throw Exception('Ошибка доступа к Firebase. Обновите Firestore Rules!');
+      debugPrint('Update event failed (check Firestore Rules): $e');
+      throw Exception('Ошибка доступа к Firebase. Проверьте Firestore Rules!');
     }
   }
 
@@ -120,12 +131,8 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
   Future<EventModel> getEventDetails(String eventId) async {
     try {
       final doc = await firestore.collection('events').doc(eventId).get();
-
-      if (!doc.exists) {
-        throw Exception('Event not found');
-      }
-
-      return EventModel.fromJson(doc.data()!..['id'] = doc.id);
+      if (!doc.exists) throw Exception('Ивент не найден');
+      return EventModel.fromJson(_withId(doc.data()!, doc.id));
     } catch (e) {
       throw Exception('Failed to fetch event details: $e');
     }
@@ -139,13 +146,12 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
           .where('clubId', isEqualTo: clubId)
           .get();
 
-      var events = snapshot.docs
-          .map((doc) => EventModel.fromJson(doc.data()..['id'] = doc.id))
+      final events = snapshot.docs
+          .map((doc) => EventModel.fromJson(_withId(doc.data(), doc.id)))
           .where((event) => event.isActive)
           .toList();
-          
-      events.sort((a, b) => a.date.compareTo(b.date));
 
+      events.sort((a, b) => a.date.compareTo(b.date));
       return events;
     } catch (e) {
       throw Exception('Failed to fetch events by club: $e');
@@ -156,7 +162,6 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
   Future<void> followClub(String clubId, String userId) async {
     try {
       final batch = firestore.batch();
-
       final clubRef = firestore.collection('clubs').doc(clubId);
       final followRef = firestore
           .collection('clubs')
@@ -165,8 +170,15 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
           .doc(userId);
 
       batch.set(followRef, {'userId': userId, 'followedAt': Timestamp.now()});
-
       batch.update(clubRef, {'memberCount': FieldValue.increment(1)});
+
+      // Also store in user doc
+      final userRef = firestore.collection('users').doc(userId);
+      batch.set(
+        userRef,
+        {'followedClubs': FieldValue.arrayUnion([clubId])},
+        SetOptions(merge: true),
+      );
 
       await batch.commit();
     } catch (e) {
@@ -178,7 +190,6 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
   Future<void> unfollowClub(String clubId, String userId) async {
     try {
       final batch = firestore.batch();
-
       final clubRef = firestore.collection('clubs').doc(clubId);
       final followRef = firestore
           .collection('clubs')
@@ -187,8 +198,14 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
           .doc(userId);
 
       batch.delete(followRef);
-
       batch.update(clubRef, {'memberCount': FieldValue.increment(-1)});
+
+      final userRef = firestore.collection('users').doc(userId);
+      batch.set(
+        userRef,
+        {'followedClubs': FieldValue.arrayRemove([clubId])},
+        SetOptions(merge: true),
+      );
 
       await batch.commit();
     } catch (e) {
@@ -203,21 +220,20 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
       if (!userDoc.exists) return [];
 
       final data = userDoc.data() ?? {};
-      final List<dynamic> registeredEvents = data['registeredEvents'] ?? [];
+      final List<String> registeredEvents =
+          List<String>.from(data['registeredEvents'] ?? []);
 
       if (registeredEvents.isEmpty) return [];
 
-      final List<EventModel> myEvents = [];
-      for (final docId in registeredEvents) {
-        final eventDoc =
-            await firestore.collection('events').doc(docId as String).get();
-        if (eventDoc.exists) {
-          myEvents.add(
-            EventModel.fromJson(eventDoc.data()!..['id'] = eventDoc.id),
-          );
-        }
-      }
-      return myEvents;
+      // Fix N+1: parallel fetch with Future.wait
+      final futures = registeredEvents
+          .map((docId) => firestore.collection('events').doc(docId).get());
+      final docs = await Future.wait(futures);
+
+      return docs
+          .where((doc) => doc.exists)
+          .map((doc) => EventModel.fromJson(_withId(doc.data()!, doc.id)))
+          .toList();
     } catch (e) {
       throw Exception('Failed to fetch my events: $e');
     }
@@ -230,6 +246,16 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
       final data = doc.data() ?? {};
       final List<dynamic> registeredEvents = data['registeredEvents'] ?? [];
       return registeredEvents.contains(eventId);
+    });
+  }
+
+  @override
+  Stream<bool> isFollowingClub(String clubId, String userId) {
+    return firestore.collection('users').doc(userId).snapshots().map((doc) {
+      if (!doc.exists) return false;
+      final data = doc.data() ?? {};
+      final List<dynamic> followedClubs = data['followedClubs'] ?? [];
+      return followedClubs.contains(clubId);
     });
   }
 

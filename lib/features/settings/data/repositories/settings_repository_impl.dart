@@ -8,7 +8,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
   SettingsRepositoryImpl(this._dataSource);
   @override
   Future<void> changeLang(String code) async {
-    if (code != AppConstants.english && code != AppConstants.russion) {
+    if (code != AppConstants.english && code != AppConstants.russian) {
       throw ArgumentError('Unsupported language code: $code');
     }
 

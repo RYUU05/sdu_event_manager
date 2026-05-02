@@ -9,7 +9,7 @@ class AppLocalizationsRu extends AppLocalizations {
   AppLocalizationsRu([String locale = 'ru']) : super(locale);
 
   @override
-  String get appTitle => 'Событий';
+  String get appTitle => 'SDU События';
 
   @override
   String get comingEvents => 'Ближайшие мероприятия';
@@ -27,7 +27,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get logout => 'Выход';
 
   @override
-  String get selectingLang => 'Выборите язык';
+  String get selectingLang => 'Выберите язык';
 
   @override
   String get cancel => 'Отмена';
