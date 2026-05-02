@@ -71,4 +71,6 @@ class Event {
 
   double get registrationPercentage =>
       maxParticipants > 0 ? currentParticipants / maxParticipants : 0.0;
+
+  String get category => tags.isNotEmpty ? tags.first : 'Other';
 }

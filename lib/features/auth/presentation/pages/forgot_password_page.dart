@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:event_manager/features/auth/presentation/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:event_manager/core/extensions/context_extensions.dart';
 import '../bloc/auth_bloc_simple.dart';
 
 @RoutePage()
@@ -26,11 +27,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   void _send() {
     final email = _emailCtrl.text.trim();
     if (email.isEmpty) {
-      _showSnack('Введите email', isError: true);
+      _showSnack(context.localization.enterEmail, isError: true);
       return;
     }
     if (!RegExp(r'^[\w.-]+@[\w.-]+\.\w+$').hasMatch(email)) {
-      _showSnack('Введите корректный email', isError: true);
+      _showSnack(context.localization.invalidEmail, isError: true);
       return;
     }
     context.read<AuthBloc>().add(ResetPasswordRequested(email));
@@ -48,11 +49,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Восстановление пароля')),
+      appBar: AppBar(title: Text(context.localization.resetPassword)),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is PasswordResetSent) {
-            _showSnack('Письмо отправлено! Проверьте почту.');
+            _showSnack(context.localization.emailSent);
             context.router.maybePop();
           } else if (state is AuthError) {
             _showSnack(state.message, isError: true);
@@ -65,7 +66,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             children: [
               const SizedBox(height: 16),
               Text(
-                'Введите email, привязанный к аккаунту. Мы отправим ссылку для сброса пароля.',
+                context.localization.resetPasswordPrompt,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Colors.grey[700],
                       height: 1.5,
@@ -75,7 +76,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               CustonTextField(
                 controller: _emailCtrl,
                 focusNode: _emailFocus,
-                label: 'Email',
+                label: context.localization.email,
                 icon: Icons.email_outlined,
                 textInputType: TextInputType.emailAddress,
               ),
@@ -96,7 +97,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                   strokeWidth: 2, color: Colors.white),
                             )
                           : const Icon(Icons.send_outlined),
-                      label: const Text('Отправить письмо'),
+                      label: Text(context.localization.sendEmail),
                     ),
                   );
                 },

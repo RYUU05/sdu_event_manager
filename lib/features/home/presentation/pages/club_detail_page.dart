@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/router/app_router.gr.dart';
 import '../../../auth/domain/entities/user_entity.dart';
+import 'package:event_manager/core/extensions/context_extensions.dart';
 
 @RoutePage(name: 'ClubDetailRoute')
 class ClubDetailPage extends StatefulWidget {
@@ -52,7 +53,7 @@ class _ClubDetailPageState extends State<ClubDetailPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('${context.localization.errorLabel}: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -130,8 +131,8 @@ class _ClubDetailPageState extends State<ClubDetailPage> {
                               size: 18,
                               color: Theme.of(context).colorScheme.primary),
                           const SizedBox(width: 6),
-                          Text(
-                            '$memberCount участников',
+                           Text(
+                            '$memberCount ${context.localization.memberCount}',
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                         ],
@@ -141,7 +142,7 @@ class _ClubDetailPageState extends State<ClubDetailPage> {
                       // Description
                       if (description.isNotEmpty) ...[
                         Text(
-                          'О клубе',
+                          context.localization.aboutClub,
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
@@ -182,8 +183,8 @@ class _ClubDetailPageState extends State<ClubDetailPage> {
                                         ? Icons.favorite
                                         : Icons.favorite_border),
                                 label: Text(isFollowing
-                                    ? 'Вы подписаны'
-                                    : 'Подписаться'),
+                                    ? context.localization.following
+                                    : context.localization.follow),
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: isFollowing
                                       ? Colors.red
@@ -201,7 +202,7 @@ class _ClubDetailPageState extends State<ClubDetailPage> {
 
                       const SizedBox(height: 28),
                       Text(
-                        'Ивенты клуба',
+                        context.localization.clubEvents,
                         style: Theme.of(context)
                             .textTheme
                             .titleMedium
@@ -236,7 +237,7 @@ class _ClubDetailPageState extends State<ClubDetailPage> {
                             horizontal: 20, vertical: 24),
                         child: Center(
                           child: Text(
-                            'У этого клуба пока нет ивентов',
+                            context.localization.noClubEvents,
                             style: TextStyle(color: Colors.grey[500]),
                           ),
                         ),
@@ -252,7 +253,7 @@ class _ClubDetailPageState extends State<ClubDetailPage> {
                       itemBuilder: (context, i) {
                         final doc = docs[i];
                         final data = doc.data() as Map<String, dynamic>;
-                        final title = data['title'] ?? 'Без названия';
+                        final title = data['title'] ?? context.localization.noTitle;
                         final location = data['location'] ?? '';
                         final imageUrl =
                             (data['imageUrl'] ?? '').toString();

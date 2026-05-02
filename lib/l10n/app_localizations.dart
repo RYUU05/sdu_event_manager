@@ -145,11 +145,11 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get cancel;
 
-  /// No description provided for @create_event.
+  /// No description provided for @createEvent.
   ///
   /// In en, this message translates to:
   /// **'Create Event'**
-  String get create_event;
+  String get createEvent;
 
   /// No description provided for @firstNavBar.
   ///
@@ -235,6 +235,61 @@ abstract class AppLocalizations {
   String get selectDateTimePrompt;
   String get eventUpdated;
   String get eventCreated;
+
+  String get organizer;
+  String get participantsCount;
+  String get unlimitedParticipants;
+  String get descriptionLabel;
+  String get noDescription;
+  String get participate;
+  String get cancelParticipation;
+  String get noSeats;
+  String get myEventsShortcut;
+  String get eventNotFound;
+  String get editTooltip;
+  String get deleteTooltip;
+  String get deleteConfirmTitle;
+  String get deleteConfirmContent;
+
+  String get memberCount;
+  String get aboutClub;
+  String get following;
+  String get follow;
+  String get clubEvents;
+  String get noClubEvents;
+
+  String get email;
+  String get password;
+  String get login;
+  String get register;
+  String get noAccount;
+  String get haveAccount;
+  String get forgotPassword;
+  String get welcomeBack;
+  String get welcome;
+  String get invalidEmail;
+  String get shortPassword;
+  String get emptyFields;
+  String get authErrorWrong;
+  String get authErrorNotFound;
+  String get authErrorTooMany;
+  String get authErrorNetwork;
+
+  String get student;
+  String get club;
+  String get firstName;
+  String get lastName;
+  String get clubNameLabel;
+  String get registerAsClub;
+  String get registerAsStudent;
+  String get enterEmail;
+  String get enterClubName;
+  String get enterNameSurname;
+
+  String get resetPassword;
+  String get resetPasswordPrompt;
+  String get sendEmail;
+  String get emailSent;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

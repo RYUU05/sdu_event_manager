@@ -5,6 +5,7 @@ import 'package:event_manager/features/home/domain/entities/event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:event_manager/core/extensions/context_extensions.dart';
 import '../../../../core/di/injection.dart';
 
 import '../../../../core/router/app_router.gr.dart';
@@ -89,40 +90,25 @@ class _MyEventsViewState extends State<_MyEventsView> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(context.localization.selectCategory),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: Text(context.localization.allCategories),
-              leading: Radio<String?>(
+        content: RadioGroup<String?>(
+          groupValue: _selectedCategory,
+          onChanged: (value) {
+            setState(() => _selectedCategory = value);
+            Navigator.pop(context);
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RadioListTile<String?>(
+                title: Text(context.localization.allCategories),
                 value: null,
-                groupValue: _selectedCategory,
-                onChanged: (value) {
-                  setState(() => _selectedCategory = value);
-                  Navigator.pop(context);
-                },
               ),
-              onTap: () {
-                setState(() => _selectedCategory = null);
-                Navigator.pop(context);
-              },
-            ),
-            ..._categories.map((category) => ListTile(
-                  title: Text(_getCategoryName(context, category)),
-                  leading: Radio<String?>(
+              ..._categories.map((category) => RadioListTile<String?>(
+                    title: Text(_getCategoryName(context, category)),
                     value: category,
-                    groupValue: _selectedCategory,
-                    onChanged: (value) {
-                      setState(() => _selectedCategory = value);
-                      Navigator.pop(context);
-                    },
-                  ),
-                  onTap: () {
-                    setState(() => _selectedCategory = category);
-                    Navigator.pop(context);
-                  },
-                )),
-          ],
+                  )),
+            ],
+          ),
         ),
       ),
     );

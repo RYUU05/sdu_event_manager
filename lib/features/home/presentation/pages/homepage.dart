@@ -87,7 +87,7 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () =>
                     context.router.push(CreateEventRoute()),
                 icon: const Icon(Icons.add),
-                label: Text(context.localization.create_event),
+                label: Text(context.localization.createEvent),
               );
             }
             return const SizedBox.shrink();

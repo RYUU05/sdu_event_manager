@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/club.dart';
+import 'package:event_manager/core/extensions/context_extensions.dart';
 
 class ClubCard extends StatelessWidget {
   final Club club;
@@ -77,7 +78,7 @@ class ClubCard extends StatelessWidget {
                             size: 14, color: Colors.grey[600]),
                         const SizedBox(width: 3),
                         Text(
-                          '${club.memberCount} участников',
+                          '${club.memberCount} ${context.localization.memberCount}',
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall

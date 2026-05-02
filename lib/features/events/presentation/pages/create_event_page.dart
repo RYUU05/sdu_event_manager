@@ -4,6 +4,7 @@ import 'package:event_manager/features/auth/domain/entities/user_entity.dart';
 import 'package:event_manager/features/auth/presentation/bloc/auth_bloc_simple.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:event_manager/core/extensions/context_extensions.dart';
 
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -100,25 +101,45 @@ class _CreateEventPageState extends State<CreateEventPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка выбора изображения: $e')),
+          SnackBar(content: Text('${context.localization.imageError}: $e')),
         );
       }
     }
   }
 
+  String _getCategoryName(BuildContext context, String category) {
+    switch (category) {
+      case 'Academic':
+        return context.localization.catAcademic;
+      case 'Sports':
+        return context.localization.catSports;
+      case 'Culture':
+        return context.localization.catCulture;
+      case 'Social':
+        return context.localization.catSocial;
+      case 'Career':
+        return context.localization.catCareer;
+      case 'Other':
+        return context.localization.catOther;
+      default:
+        return category;
+    }
+  }
+
   Future<void> _submitForm() async {
+    final l10n = context.localization;
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedDate == null || _selectedTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Выберите дату и время ивента')),
+        SnackBar(content: Text(l10n.selectDateTimePrompt)),
       );
       return;
     }
 
     if (_selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Выберите категорию')),
+        SnackBar(content: Text(context.localization.selectCategoryPrompt)),
       );
       return;
     }
@@ -156,7 +177,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
           finalImageUrl = await snapshot.ref.getDownloadURL();
         } else {
           throw Exception(
-              'Загрузка не удалась. Проверьте правила Firebase Storage.');
+              'Upload failed. Check Firebase Storage rules.');
         }
       }
 
@@ -169,8 +190,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
       // Validate max participants
       final maxPart = int.tryParse(_maxParticipantsController.text) ?? 0;
       if (maxPart < 0) {
-        throw Exception(
-            'Максимальное количество участников не может быть отрицательным');
+        throw Exception(l10n.cannotBeNegative);
       }
 
       final eventData = {
@@ -193,7 +213,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
             .update(eventData);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Ивент обновлён!')),
+            SnackBar(content: Text(l10n.eventUpdated)),
           );
           context.router.maybePop();
         }
@@ -206,7 +226,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
         await FirebaseFirestore.instance.collection('events').add(eventData);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Ивент создан!')),
+            SnackBar(content: Text(l10n.eventCreated)),
           );
           context.router.maybePop();
         }
@@ -214,7 +234,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('${l10n.errorLabel}: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -227,13 +247,13 @@ class _CreateEventPageState extends State<CreateEventPage> {
     final isEditing = widget.eventToEdit != null;
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? 'Редактировать ивент' : 'Создать ивент'),
+        title: Text(isEditing ? context.localization.editEvent : context.localization.createEvent),
       ),
       body: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
           if (state is! Authenticated || state.user.role != UserRole.club) {
-            return const Center(
-              child: Text('Только клубы могут создавать ивенты'),
+            return Center(
+              child: Text(context.localization.onlyClubsCreate),
             );
           }
 
@@ -247,21 +267,21 @@ class _CreateEventPageState extends State<CreateEventPage> {
                   // Title
                   TextFormField(
                     controller: _titleController,
-                    decoration: const InputDecoration(
-                      labelText: 'Название ивента *',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: context.localization.eventTitle,
+                      border: const OutlineInputBorder(),
                     ),
                     validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? 'Обязательное поле' : null,
+                        (v == null || v.trim().isEmpty) ? context.localization.requiredField : null,
                   ),
                   const SizedBox(height: 16),
 
                   // Description
                   TextFormField(
                     controller: _descriptionController,
-                    decoration: const InputDecoration(
-                      labelText: 'Описание',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: context.localization.description,
+                      border: const OutlineInputBorder(),
                     ),
                     maxLines: 3,
                   ),
@@ -270,12 +290,12 @@ class _CreateEventPageState extends State<CreateEventPage> {
                   // Location
                   TextFormField(
                     controller: _locationController,
-                    decoration: const InputDecoration(
-                      labelText: 'Место проведения *',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: context.localization.location,
+                      border: const OutlineInputBorder(),
                     ),
                     validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? 'Обязательное поле' : null,
+                        (v == null || v.trim().isEmpty) ? context.localization.requiredField : null,
                   ),
                   const SizedBox(height: 16),
 
@@ -310,7 +330,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                         size: 40, color: Colors.grey[400]),
                                     const SizedBox(height: 8),
                                     Text(
-                                      'Нажмите, чтобы добавить постер',
+                                      context.localization.addPosterPrompt,
                                       style: TextStyle(color: Colors.grey[500]),
                                     ),
                                   ],
@@ -323,15 +343,15 @@ class _CreateEventPageState extends State<CreateEventPage> {
                   TextFormField(
                     controller: _maxParticipantsController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Макс. участников (0 = без ограничений)',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: context.localization.maxParticipants,
+                      border: const OutlineInputBorder(),
                     ),
                     validator: (v) {
                       if (v == null || v.isEmpty) return null;
                       final n = int.tryParse(v);
-                      if (n == null) return 'Введите целое число';
-                      if (n < 0) return 'Не может быть отрицательным';
+                      if (n == null) return context.localization.enterInteger;
+                      if (n < 0) return context.localization.cannotBeNegative;
                       return null;
                     },
                   ),
@@ -340,18 +360,18 @@ class _CreateEventPageState extends State<CreateEventPage> {
                   // Category
                   DropdownButtonFormField<String>(
                     initialValue: _selectedCategory,
-                    decoration: const InputDecoration(
-                      labelText: 'Категория *',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: context.localization.categoryLabel,
+                      border: const OutlineInputBorder(),
                     ),
                     items: _categories
                         .map((c) =>
-                            DropdownMenuItem(value: c, child: Text(c)))
+                            DropdownMenuItem(value: c, child: Text(_getCategoryName(context, c))))
                         .toList(),
                     onChanged: (v) =>
                         setState(() => _selectedCategory = v),
                     validator: (v) =>
-                        v == null ? 'Выберите категорию' : null,
+                        v == null ? context.localization.selectCategoryPrompt : null,
                   ),
                   const SizedBox(height: 16),
 
@@ -364,7 +384,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                           icon: const Icon(Icons.calendar_today),
                           label: Text(
                             _selectedDate == null
-                                ? 'Выбрать дату'
+                                ? context.localization.selectDate
                                 : '${_selectedDate!.day}.${_selectedDate!.month}.${_selectedDate!.year}',
                           ),
                         ),
@@ -376,7 +396,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                           icon: const Icon(Icons.access_time),
                           label: Text(
                             _selectedTime == null
-                                ? 'Выбрать время'
+                                ? context.localization.selectTime
                                 : '${_selectedTime!.hour}:${_selectedTime!.minute.toString().padLeft(2, '0')}',
                           ),
                         ),
@@ -402,8 +422,8 @@ class _CreateEventPageState extends State<CreateEventPage> {
                           : Icon(isEditing ? Icons.save : Icons.add),
                       label: Text(
                         _isLoading
-                            ? (isEditing ? 'Сохранение...' : 'Создание...')
-                            : (isEditing ? 'Сохранить' : 'Создать ивент'),
+                            ? (isEditing ? context.localization.saving : context.localization.creating)
+                            : (isEditing ? context.localization.save : context.localization.createEvent),
                         style: const TextStyle(fontSize: 16),
                       ),
                     ),

@@ -98,7 +98,7 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
       });
     } catch (e) {
       debugPrint('Update event failed (check Firestore Rules): $e');
-      throw Exception('Ошибка доступа к Firebase. Проверьте Firestore Rules!');
+      throw Exception('Ошибка доступа к Firebase: $e. Проверьте Firestore Rules!');
     }
   }
 
@@ -123,7 +123,7 @@ class FirebaseDataSourceImpl implements FirebaseDataSource {
       });
     } catch (e) {
       debugPrint('Update event failed (check Firestore Rules): $e');
-      throw Exception('Ошибка доступа к Firebase. Проверьте Firestore Rules!');
+      throw Exception('Ошибка доступа к Firebase: $e. Проверьте Firestore Rules!');
     }
   }
 

@@ -6,7 +6,7 @@ import 'app_localizations.dart';
 
 /// The translations for English (`en`).
 class AppLocalizationsEn extends AppLocalizations {
-  AppLocalizationsEn([String locale = 'en']) : super(locale);
+  AppLocalizationsEn([super.locale = 'en']);
 
   @override
   String get appTitle => 'University Events';
@@ -33,7 +33,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancel => 'Cancel';
 
   @override
-  String get create_event => 'Create Event';
+  String get createEvent => 'Create Event';
 
   @override
   String get firstNavBar => 'Events';
@@ -155,4 +155,154 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eventUpdated => 'Event updated!';
   @override
   String get eventCreated => 'Event created!';
+
+  @override
+  String get organizer => 'Organizer';
+
+  @override
+  String get participantsCount => 'participants';
+
+  @override
+  String get unlimitedParticipants => 'participants (unlimited)';
+
+  @override
+  String get descriptionLabel => 'Description';
+
+  @override
+  String get noDescription => 'No description';
+
+  @override
+  String get participate => 'Participate';
+
+  @override
+  String get cancelParticipation => 'Cancel Participation';
+
+  @override
+  String get noSeats => 'No seats';
+
+  @override
+  String get myEventsShortcut => 'My Events';
+
+  @override
+  String get eventNotFound => 'Event not found';
+
+  @override
+  String get editTooltip => 'Edit event';
+
+  @override
+  String get deleteTooltip => 'Delete event';
+
+  @override
+  String get deleteConfirmTitle => 'Delete event?';
+
+  @override
+  String get deleteConfirmContent => 'This action cannot be undone.';
+
+  @override
+  String get memberCount => 'members';
+
+  @override
+  String get aboutClub => 'About Club';
+
+  @override
+  String get following => 'Following';
+
+  @override
+  String get follow => 'Follow';
+
+  @override
+  String get clubEvents => 'Club Events';
+
+  @override
+  String get noClubEvents => 'This club has no events yet';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get login => 'Login';
+
+  @override
+  String get register => 'Register';
+
+  @override
+  String get noAccount => 'Don\'t have an account?';
+
+  @override
+  String get haveAccount => 'Already have an account?';
+
+  @override
+  String get forgotPassword => 'Forgot password?';
+
+  @override
+  String get welcomeBack => 'Welcome back';
+
+  @override
+  String get welcome => 'Welcome';
+
+  @override
+  String get invalidEmail => 'Enter a valid email';
+
+  @override
+  String get shortPassword => 'Password must be at least 6 characters';
+
+  @override
+  String get emptyFields => 'Enter email and password';
+
+  @override
+  String get authErrorWrong => 'Incorrect email or password';
+
+  @override
+  String get authErrorNotFound => 'User not found';
+
+  @override
+  String get authErrorTooMany => 'Too many attempts. Try again later';
+
+  @override
+  String get authErrorNetwork => 'No network connection';
+
+  @override
+  String get student => 'Student';
+
+  @override
+  String get club => 'Club';
+
+  @override
+  String get firstName => 'First Name';
+
+  @override
+  String get lastName => 'Last Name';
+
+  @override
+  String get clubNameLabel => 'Club Name';
+
+  @override
+  String get registerAsClub => 'Register as Club';
+
+  @override
+  String get registerAsStudent => 'Register as Student';
+
+  @override
+  String get enterEmail => 'Enter email';
+
+  @override
+  String get enterClubName => 'Enter club name';
+
+  @override
+  String get enterNameSurname => 'Enter first and last name';
+
+  @override
+  String get resetPassword => 'Reset Password';
+
+  @override
+  String get resetPasswordPrompt => 'Enter the email associated with your account. We will send a link to reset your password.';
+
+  @override
+  String get sendEmail => 'Send Email';
+
+  @override
+  String get emailSent => 'Email sent! Check your inbox.';
 }

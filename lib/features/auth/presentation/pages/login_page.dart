@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:event_manager/features/auth/presentation/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:event_manager/core/extensions/context_extensions.dart';
 import '../../../../core/router/app_router.gr.dart';
 import '../bloc/auth_bloc_simple.dart';
 
@@ -37,15 +38,15 @@ class _LoginPageState extends State<LoginPage> {
     final pass = _passCtrl.text;
 
     if (email.isEmpty || pass.isEmpty) {
-      _showError('Введите email и пароль');
+      _showError(context.localization.emptyFields);
       return;
     }
     if (!_isValidEmail(email)) {
-      _showError('Введите корректный email');
+      _showError(context.localization.invalidEmail);
       return;
     }
     if (pass.length < 6) {
-      _showError('Пароль должен содержать минимум 6 символов');
+      _showError(context.localization.shortPassword);
       return;
     }
 
@@ -60,13 +61,13 @@ class _LoginPageState extends State<LoginPage> {
 
   String _friendlyError(String raw) {
     if (raw.contains('wrong-password') || raw.contains('invalid-credential')) {
-      return 'Неверный email или пароль';
+      return context.localization.authErrorWrong;
     }
-    if (raw.contains('user-not-found')) return 'Пользователь не найден';
+    if (raw.contains('user-not-found')) return context.localization.authErrorNotFound;
     if (raw.contains('too-many-requests')) {
-      return 'Слишком много попыток. Попробуйте позже';
+      return context.localization.authErrorTooMany;
     }
-    if (raw.contains('network-request-failed')) return 'Нет подключения к сети';
+    if (raw.contains('network-request-failed')) return context.localization.authErrorNetwork;
     return raw;
   }
 
@@ -100,7 +101,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Добро пожаловать',
+                  context.localization.welcome,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Colors.grey[600],
                       ),
@@ -109,7 +110,7 @@ class _LoginPageState extends State<LoginPage> {
                 CustonTextField(
                   controller: _emailCtrl,
                   focusNode: _emailFocus,
-                  label: 'Email',
+                  label: context.localization.email,
                   icon: Icons.email_outlined,
                   textInputType: TextInputType.emailAddress,
                 ),
@@ -117,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
                 CustonTextField(
                   controller: _passCtrl,
                   focusNode: _passFocus,
-                  label: 'Пароль',
+                  label: context.localization.password,
                   icon: Icons.lock_outline,
                   textInputType: TextInputType.visiblePassword,
                   obscure: true,
@@ -128,7 +129,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: TextButton(
                     onPressed: () =>
                         context.router.push(const ForgotPasswordRoute()),
-                    child: const Text('Забыли пароль?'),
+                    child: Text(context.localization.forgotPassword),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -149,8 +150,8 @@ class _LoginPageState extends State<LoginPage> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Text('Войти',
-                                style: TextStyle(fontSize: 16)),
+                            : Text(context.localization.login,
+                                style: const TextStyle(fontSize: 16)),
                       ),
                     );
                   },
@@ -159,13 +160,13 @@ class _LoginPageState extends State<LoginPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Нет аккаунта?',
+                    Text(context.localization.noAccount,
                         style:
                             TextStyle(color: Colors.grey[600])),
                     TextButton(
                       onPressed: () =>
                           context.router.push(const RegisterRoute()),
-                      child: const Text('Зарегистрироваться'),
+                      child: Text(context.localization.register),
                     ),
                   ],
                 ),

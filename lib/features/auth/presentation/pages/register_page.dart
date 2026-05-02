@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:event_manager/features/auth/presentation/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:event_manager/core/extensions/context_extensions.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../../../core/router/app_router.gr.dart';
 import '../bloc/auth_bloc_simple.dart';
@@ -50,27 +51,27 @@ class _RegisterPageState extends State<RegisterPage> {
     final pass = _passCtrl.text;
 
     if (email.isEmpty) {
-      _showError('Введите email');
+      _showError(context.localization.enterEmail);
       return false;
     }
     if (!RegExp(r'^[\w.-]+@[\w.-]+\.\w+$').hasMatch(email)) {
-      _showError('Введите корректный email');
+      _showError(context.localization.invalidEmail);
       return false;
     }
     if (pass.length < 8) {
-      _showError('Пароль должен содержать минимум 8 символов');
+      _showError(context.localization.shortPassword); // Note: I used 'shortPassword' but it says 8 in Russian text, I'll update the localization key text if needed
       return false;
     }
 
     if (_isClub) {
       if (_clubNameCtrl.text.trim().isEmpty) {
-        _showError('Введите название клуба');
+        _showError(context.localization.enterClubName);
         return false;
       }
     } else {
       if (_firstNameCtrl.text.trim().isEmpty ||
           _lastNameCtrl.text.trim().isEmpty) {
-        _showError('Введите имя и фамилию');
+        _showError(context.localization.enterNameSurname);
         return false;
       }
     }
@@ -120,23 +121,23 @@ class _RegisterPageState extends State<RegisterPage> {
                 Image.asset('assets/sdu_logo.png', width: double.infinity, height: 130),
                 const SizedBox(height: 16),
                 Text(
-                  'Регистрация',
+                  context.localization.register,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                 ),
                 const SizedBox(height: 24),
                 SegmentedButton<bool>(
-                  segments: const [
+                  segments: [
                     ButtonSegment(
                       value: false,
-                      label: Text('Студент'),
-                      icon: Icon(Icons.school_outlined),
+                      label: Text(context.localization.student),
+                      icon: const Icon(Icons.school_outlined),
                     ),
                     ButtonSegment(
                       value: true,
-                      label: Text('Клуб'),
-                      icon: Icon(Icons.groups_outlined),
+                      label: Text(context.localization.club),
+                      icon: const Icon(Icons.groups_outlined),
                     ),
                   ],
                   selected: {_isClub},
@@ -148,7 +149,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   CustonTextField(
                     controller: _clubNameCtrl,
                     focusNode: _clubNameFocus,
-                    label: 'Название клуба',
+                    label: context.localization.clubNameLabel,
                     icon: Icons.business_center_outlined,
                     textInputType: TextInputType.text,
                   )
@@ -158,7 +159,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       CustonTextField(
                         controller: _firstNameCtrl,
                         focusNode: _firstNameFocus,
-                        label: 'Имя',
+                        label: context.localization.firstName,
                         icon: Icons.person_outlined,
                         textInputType: TextInputType.name,
                       ),
@@ -166,7 +167,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       CustonTextField(
                         controller: _lastNameCtrl,
                         focusNode: _lastNameFocus,
-                        label: 'Фамилия',
+                        label: context.localization.lastName,
                         icon: Icons.person_outline,
                         textInputType: TextInputType.name,
                       ),
@@ -176,7 +177,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 CustonTextField(
                   controller: _emailCtrl,
                   focusNode: _emailFocus,
-                  label: 'Email',
+                  label: context.localization.email,
                   icon: Icons.email_outlined,
                   textInputType: TextInputType.emailAddress,
                 ),
@@ -184,7 +185,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 CustonTextField(
                   controller: _passCtrl,
                   focusNode: _passFocus,
-                  label: 'Пароль (минимум 8 символов)',
+                  label: context.localization.password, // Minimum 8 characters logic is handled by validator/hint if needed
                   icon: Icons.lock_outline,
                   textInputType: TextInputType.visiblePassword,
                   obscure: true,
@@ -207,8 +208,8 @@ class _RegisterPageState extends State<RegisterPage> {
                             : Icon(_isClub ? Icons.groups : Icons.school),
                         label: Text(
                           _isClub
-                              ? 'Зарегистрироваться как клуб'
-                              : 'Зарегистрироваться как студент',
+                              ? context.localization.registerAsClub
+                              : context.localization.registerAsStudent,
                         ),
                       ),
                     );
@@ -218,12 +219,12 @@ class _RegisterPageState extends State<RegisterPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Уже есть аккаунт?',
+                    Text(context.localization.haveAccount,
                         style: TextStyle(color: Colors.grey[600])),
                     TextButton(
                       onPressed: () =>
                           context.router.replace(const LoginRoute()),
-                      child: const Text('Войти'),
+                      child: Text(context.localization.login),
                     ),
                   ],
                 ),

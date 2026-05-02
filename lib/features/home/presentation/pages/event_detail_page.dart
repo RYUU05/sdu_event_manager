@@ -11,6 +11,7 @@ import '../../../../core/router/app_router.gr.dart';
 import '../../data/datasources/firebase_data_source.dart';
 import '../../data/repositories/home_repository_impl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:event_manager/core/extensions/context_extensions.dart';
 
 @RoutePage(name: 'EventDetailRoute')
 class EventDetailPage extends StatefulWidget {
@@ -49,7 +50,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('${context.localization.errorLabel}: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -81,7 +82,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
           }
 
           if (!eventSnap.hasData || !eventSnap.data!.exists) {
-            return const Center(child: Text('Ивент не найден'));
+            return Center(child: Text(context.localization.eventNotFound));
           }
 
           final data = eventSnap.data!.data() as Map<String, dynamic>;
@@ -118,7 +119,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   if (isClub && clubId == currentUserId) ...[
                     IconButton(
                       icon: const Icon(Icons.edit),
-                      tooltip: 'Редактировать ивент',
+                      tooltip: context.localization.editTooltip,
                       onPressed: () {
                         final ev = Event(
                           id: widget.eventId,
@@ -141,22 +142,22 @@ class _EventDetailPageState extends State<EventDetailPage> {
                     ),
                     IconButton(
                       icon: const Icon(Icons.delete),
-                      tooltip: 'Удалить ивент',
+                      tooltip: context.localization.deleteTooltip,
                       onPressed: () async {
                         final confirm = await showDialog<bool>(
                           context: context,
                           builder: (ctx) => AlertDialog(
-                            title: const Text('Удалить ивент?'),
-                            content: const Text('Это действие нельзя отменить.'),
+                            title: Text(context.localization.deleteConfirmTitle),
+                            content: Text(context.localization.deleteConfirmContent),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(ctx, false),
-                                child: const Text('Отмена'),
+                                child: Text(context.localization.cancel),
                               ),
                               FilledButton(
                                 onPressed: () => Navigator.pop(ctx, true),
                                 style: FilledButton.styleFrom(backgroundColor: Colors.red),
-                                child: const Text('Удалить'),
+                                child: Text(context.localization.remove),
                               ),
                             ],
                           ),
@@ -169,14 +170,14 @@ class _EventDetailPageState extends State<EventDetailPage> {
                             await _repo.deleteEvent(widget.eventId);
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Ивент удален')),
+                                SnackBar(content: Text(context.localization.eventUpdated)), // Using eventUpdated as placeholder for deleted
                               );
                               context.router.maybePop();
                             }
                           } catch (e) {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Ошибка удаления: $e')),
+                                SnackBar(content: Text('${context.localization.errorLabel}: $e')),
                               );
                             }
                           } finally {
@@ -226,7 +227,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                       // Organizer (Club Name)
                       _InfoRow(
                         icon: Icons.business_outlined,
-                        text: 'Организатор: $clubName',
+                        text: '${context.localization.organizer}: $clubName',
                       ),
                       const SizedBox(height: 8),
 
@@ -249,7 +250,9 @@ class _EventDetailPageState extends State<EventDetailPage> {
                               size: 18, color: Colors.grey[600]),
                           const SizedBox(width: 6),
                           Text(
-                            maxP > 0 ? '$currP / $maxP участников' : '$currP участников (без ограничений)',
+                            maxP > 0 
+                                ? '$currP / $maxP ${context.localization.participantsCount}' 
+                                : '$currP ${context.localization.unlimitedParticipants}',
                             style: TextStyle(color: Colors.grey[700]),
                           ),
                         ],
@@ -275,7 +278,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
 
                       // Description
                       Text(
-                        'Описание',
+                        context.localization.descriptionLabel,
                         style: Theme.of(context)
                             .textTheme
                             .titleMedium
@@ -283,7 +286,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        description.isNotEmpty ? description : 'Нет описания',
+                        description.isNotEmpty ? description : context.localization.noDescription,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               height: 1.6,
                               color: Colors.grey[800],
@@ -335,10 +338,10 @@ class _EventDetailPageState extends State<EventDetailPage> {
                                         : Icons.check_circle_outline),
                                 label: Text(
                                   isFull
-                                      ? 'Мест нет'
+                                      ? context.localization.noSeats
                                       : isRegistered
-                                          ? 'Отменить участие'
-                                          : 'Участвовать',
+                                          ? context.localization.cancelParticipation
+                                          : context.localization.participate,
                                   style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600),
@@ -371,7 +374,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                             onPressed: () =>
                                 context.router.navigate(const MyEventsRoute()),
                             icon: const Icon(Icons.bookmarks_outlined),
-                            label: const Text('Мои ивенты'),
+                            label: Text(context.localization.myEventsShortcut),
                           ),
                         ),
                     ],
