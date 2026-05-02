@@ -2,17 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:provider/provider.dart';
+import 'core/di/injection.dart';
 import 'core/providers/language_provider.dart';
 import 'core/router/app_router.dart';
 import 'features/auth/presentation/bloc/auth_bloc_simple.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
-import 'package:provider/provider.dart';
-import 'package:event_manager/l10n/app_localizations.dart';
+import 'firebase_options.dart';
+import 'l10n/app_localizations.dart';
+
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  configureDependencies();
   FlutterNativeSplash.remove();
   runApp(const MyApp());
 }
@@ -30,8 +36,8 @@ class MyApp extends StatelessWidget {
           create: (_) => LanguageProvider()..init(),
         ),
       ],
-      child: BlocProvider(
-        create: (_) => AuthBloc(AuthRepositoryImpl()),
+      child: BlocProvider.value(
+        value: getIt<AuthBloc>(),
         child: Consumer<LanguageProvider>(
           builder: (context, languageProvider, _) {
             return MaterialApp.router(

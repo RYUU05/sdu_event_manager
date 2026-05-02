@@ -110,14 +110,17 @@ class _MyEventsView extends StatelessWidget {
               return _EmptyState(isClub: isClub);
             }
 
-            return ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: state.events.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final event = state.events[index];
-                return _MyEventCard(event: event, isClub: isClub);
-              },
+            return RefreshIndicator(
+              onRefresh: () async => _refreshEvents(context),
+              child: ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: state.events.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final event = state.events[index];
+                  return _MyEventCard(event: event, isClub: isClub);
+                },
+              ),
             );
           }
 
@@ -225,7 +228,7 @@ class _MyEventCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       // Remove button only for students
-                      if (!isClub) _RemoveButton(eventId: event.id),
+                      if (!isClub) _RemoveButton(key: ValueKey('remove_${event.id}'), eventId: event.id),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -327,7 +330,7 @@ class _MyEventCard extends StatelessWidget {
 class _RemoveButton extends StatefulWidget {
   final String eventId;
 
-  const _RemoveButton({required this.eventId});
+  const _RemoveButton({super.key, required this.eventId});
 
   @override
   State<_RemoveButton> createState() => _RemoveButtonState();

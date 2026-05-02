@@ -13,7 +13,7 @@ import 'package:event_manager/features/home/domain/entities/event.dart';
 @RoutePage(name: 'CreateEventRoute')
 class CreateEventPage extends StatefulWidget {
   final Event? eventToEdit;
-  
+
   const CreateEventPage({super.key, this.eventToEdit});
 
   @override
@@ -37,12 +37,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
   bool _isLoading = false;
 
   final List<String> _categories = [
-    'Academic',
-    'Sports',
-    'Culture',
-    'Social',
-    'Career',
-    'Other',
+    'Academic', 'Sports', 'Culture', 'Social', 'Career', 'Other',
   ];
 
   @override
@@ -53,15 +48,15 @@ class _CreateEventPageState extends State<CreateEventPage> {
       _titleController.text = e.title;
       _descriptionController.text = e.description;
       _locationController.text = e.location;
-      _maxParticipantsController.text = e.maxParticipants > 0 ? e.maxParticipants.toString() : '';
+      _maxParticipantsController.text =
+          e.maxParticipants > 0 ? e.maxParticipants.toString() : '';
       _existingImageUrl = e.imageUrl;
       _selectedDate = e.date;
       _selectedTime = TimeOfDay.fromDateTime(e.date);
-      if (_categories.contains(e.tags.isNotEmpty ? e.tags.first : 'Other')) {
-        _selectedCategory = e.tags.first;
-      } else {
-        _selectedCategory = 'Other';
-      }
+      _selectedCategory =
+          _categories.contains(e.tags.isNotEmpty ? e.tags.first : null)
+              ? e.tags.first
+              : null;
     }
   }
 
@@ -77,36 +72,36 @@ class _CreateEventPageState extends State<CreateEventPage> {
   Future<void> _selectDate() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now().add(const Duration(days: 1)),
+      initialDate: _selectedDate ??
+          DateTime.now().add(const Duration(days: 1)),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
-    if (picked != null) {
-      setState(() => _selectedDate = picked);
-    }
+    if (picked != null) setState(() => _selectedDate = picked);
   }
 
   Future<void> _selectTime() async {
     final picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: _selectedTime ?? TimeOfDay.now(),
     );
-    if (picked != null) {
-      setState(() => _selectedTime = picked);
-    }
+    if (picked != null) setState(() => _selectedTime = picked);
   }
 
   Future<void> _pickImage() async {
     try {
-      final XFile? image = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 70,
+      );
       if (image != null) {
-        setState(() {
-          _selectedImage = File(image.path);
-        });
+        setState(() => _selectedImage = File(image.path));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error picking image: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка выбора изображения: $e')),
+        );
       }
     }
   }
@@ -115,9 +110,16 @@ class _CreateEventPageState extends State<CreateEventPage> {
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedDate == null || _selectedTime == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Select date and time')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Выберите дату и время ивента')),
+      );
+      return;
+    }
+
+    if (_selectedCategory == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Выберите категорию')),
+      );
       return;
     }
 
@@ -136,45 +138,48 @@ class _CreateEventPageState extends State<CreateEventPage> {
       );
 
       String finalImageUrl = _existingImageUrl ?? '';
-      
+
       if (_selectedImage != null) {
         if (!await _selectedImage!.exists()) {
-          throw Exception('Selected image file does not exist locally.');
+          throw Exception('Файл изображения не найден.');
         }
 
-        final fileName = 'events/${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final fileName =
+            'events/${authState.user.id}_${DateTime.now().millisecondsSinceEpoch}.jpg';
         final ref = FirebaseStorage.instance.ref().child(fileName);
-        
         final bytes = await _selectedImage!.readAsBytes();
         final metadata = SettableMetadata(contentType: 'image/jpeg');
-        
-        // Use putData to avoid any iOS file path permission issues
         final uploadTask = ref.putData(bytes, metadata);
-        
         final snapshot = await uploadTask.whenComplete(() {});
-        
+
         if (snapshot.state == TaskState.success) {
-          try {
-            finalImageUrl = await snapshot.ref.getDownloadURL();
-          } catch (e) {
-            throw Exception('Upload succeeded but URL fetch failed: $e\nEnsure Firebase Storage is fully activated in your Firebase Console.');
-          }
+          finalImageUrl = await snapshot.ref.getDownloadURL();
         } else {
-          throw Exception('Upload failed. State: ${snapshot.state}. Check Firebase Storage Rules and ensure Storage is activated.');
+          throw Exception(
+              'Загрузка не удалась. Проверьте правила Firebase Storage.');
         }
       }
 
+      // Default image if none provided
       if (finalImageUrl.isEmpty) {
-        finalImageUrl = 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&q=80';
+        finalImageUrl =
+            'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&q=80';
+      }
+
+      // Validate max participants
+      final maxPart = int.tryParse(_maxParticipantsController.text) ?? 0;
+      if (maxPart < 0) {
+        throw Exception(
+            'Максимальное количество участников не может быть отрицательным');
       }
 
       final eventData = {
-        'title': _titleController.text,
-        'description': _descriptionController.text,
-        'location': _locationController.text,
+        'title': _titleController.text.trim(),
+        'description': _descriptionController.text.trim(),
+        'location': _locationController.text.trim(),
         'imageUrl': finalImageUrl,
         'category': _selectedCategory,
-        'maxParticipants': int.tryParse(_maxParticipantsController.text) ?? 0,
+        'maxParticipants': maxPart,
         'dateTime': Timestamp.fromDate(dateTime),
         'clubId': authState.user.id,
         'clubName': authState.user.name,
@@ -188,28 +193,29 @@ class _CreateEventPageState extends State<CreateEventPage> {
             .update(eventData);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Event updated!')),
+            const SnackBar(content: Text('Ивент обновлён!')),
           );
           context.router.maybePop();
         }
       } else {
         eventData['createdAt'] = FieldValue.serverTimestamp();
         eventData['currentParticipants'] = 0;
-        eventData['participants'] = [];
-        
+        eventData['participants'] = <String>[];
+        eventData['isActive'] = true;
+
         await FirebaseFirestore.instance.collection('events').add(eventData);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Event created!')),
+            const SnackBar(content: Text('Ивент создан!')),
           );
           context.router.maybePop();
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка: $e'), backgroundColor: Colors.red),
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -220,11 +226,15 @@ class _CreateEventPageState extends State<CreateEventPage> {
   Widget build(BuildContext context) {
     final isEditing = widget.eventToEdit != null;
     return Scaffold(
-      appBar: AppBar(title: Text(isEditing ? 'Edit Event' : 'Create Event')),
+      appBar: AppBar(
+        title: Text(isEditing ? 'Редактировать ивент' : 'Создать ивент'),
+      ),
       body: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
           if (state is! Authenticated || state.user.role != UserRole.club) {
-            return const Center(child: Text('Only clubs can create events'));
+            return const Center(
+              child: Text('Только клубы могут создавать ивенты'),
+            );
           }
 
           return SingleChildScrollView(
@@ -234,86 +244,118 @@ class _CreateEventPageState extends State<CreateEventPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Title
                   TextFormField(
                     controller: _titleController,
                     decoration: const InputDecoration(
-                      labelText: 'Title',
+                      labelText: 'Название ивента *',
                       border: OutlineInputBorder(),
                     ),
-                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? 'Обязательное поле' : null,
                   ),
                   const SizedBox(height: 16),
+
+                  // Description
                   TextFormField(
                     controller: _descriptionController,
                     decoration: const InputDecoration(
-                      labelText: 'Description',
+                      labelText: 'Описание',
                       border: OutlineInputBorder(),
                     ),
                     maxLines: 3,
                   ),
                   const SizedBox(height: 16),
+
+                  // Location
                   TextFormField(
                     controller: _locationController,
                     decoration: const InputDecoration(
-                      labelText: 'Location',
+                      labelText: 'Место проведения *',
                       border: OutlineInputBorder(),
                     ),
-                    validator: (v) => v!.isEmpty ? 'Required' : null,
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? 'Обязательное поле' : null,
                   ),
                   const SizedBox(height: 16),
+
+                  // Image picker
                   GestureDetector(
                     onTap: _pickImage,
                     child: Container(
                       height: 150,
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: Colors.grey[200],
+                        color: Colors.grey[100],
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey[400]!),
+                        border: Border.all(color: Colors.grey[350]!),
                       ),
                       child: _selectedImage != null
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: Image.file(_selectedImage!, fit: BoxFit.contain),
+                              child: Image.file(_selectedImage!,
+                                  fit: BoxFit.cover),
                             )
-                          : _existingImageUrl != null && _existingImageUrl!.isNotEmpty
+                          : _existingImageUrl != null &&
+                                  _existingImageUrl!.isNotEmpty
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(12),
-                                  child: Image.network(_existingImageUrl!, fit: BoxFit.contain),
+                                  child: Image.network(_existingImageUrl!,
+                                      fit: BoxFit.cover),
                                 )
-                              : const Column(
+                              : Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.add_photo_alternate, size: 40, color: Colors.grey),
-                                    SizedBox(height: 8),
-                                    Text('Tap to add poster/image', style: TextStyle(color: Colors.grey)),
+                                    Icon(Icons.add_photo_alternate,
+                                        size: 40, color: Colors.grey[400]),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Нажмите, чтобы добавить постер',
+                                      style: TextStyle(color: Colors.grey[500]),
+                                    ),
                                   ],
                                 ),
                     ),
                   ),
                   const SizedBox(height: 16),
+
+                  // Max participants — with validation
                   TextFormField(
                     controller: _maxParticipantsController,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
-                      labelText: 'Max Participants (0 for unlimited)',
+                      labelText: 'Макс. участников (0 = без ограничений)',
                       border: OutlineInputBorder(),
                     ),
+                    validator: (v) {
+                      if (v == null || v.isEmpty) return null;
+                      final n = int.tryParse(v);
+                      if (n == null) return 'Введите целое число';
+                      if (n < 0) return 'Не может быть отрицательным';
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 16),
+
+                  // Category
                   DropdownButtonFormField<String>(
-                    initialValue: _selectedCategory,
+                    value: _selectedCategory,
                     decoration: const InputDecoration(
-                      labelText: 'Category',
+                      labelText: 'Категория *',
                       border: OutlineInputBorder(),
                     ),
                     items: _categories
-                        .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                        .map((c) =>
+                            DropdownMenuItem(value: c, child: Text(c)))
                         .toList(),
-                    onChanged: (v) => setState(() => _selectedCategory = v),
-                    validator: (v) => v == null ? 'Select category' : null,
+                    onChanged: (v) =>
+                        setState(() => _selectedCategory = v),
+                    validator: (v) =>
+                        v == null ? 'Выберите категорию' : null,
                   ),
                   const SizedBox(height: 16),
+
+                  // Date + Time pickers
                   Row(
                     children: [
                       Expanded(
@@ -322,44 +364,51 @@ class _CreateEventPageState extends State<CreateEventPage> {
                           icon: const Icon(Icons.calendar_today),
                           label: Text(
                             _selectedDate == null
-                                ? 'Select Date'
-                                : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
+                                ? 'Выбрать дату'
+                                : '${_selectedDate!.day}.${_selectedDate!.month}.${_selectedDate!.year}',
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: _selectTime,
                           icon: const Icon(Icons.access_time),
                           label: Text(
                             _selectedTime == null
-                                ? 'Select Time'
+                                ? 'Выбрать время'
                                 : '${_selectedTime!.hour}:${_selectedTime!.minute.toString().padLeft(2, '0')}',
                           ),
                         ),
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 32),
+
+                  // Submit button
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton.icon(
+                    height: 52,
+                    child: FilledButton.icon(
                       onPressed: _isLoading ? null : _submitForm,
                       icon: _isLoading
                           ? const SizedBox(
                               width: 20,
                               height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2, color: Colors.white),
                             )
                           : Icon(isEditing ? Icons.save : Icons.add),
                       label: Text(
                         _isLoading
-                            ? (isEditing ? 'Saving...' : 'Creating...')
-                            : (isEditing ? 'Save Event' : 'Create Event'),
+                            ? (isEditing ? 'Сохранение...' : 'Создание...')
+                            : (isEditing ? 'Сохранить' : 'Создать ивент'),
+                        style: const TextStyle(fontSize: 16),
                       ),
                     ),
                   ),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
