@@ -98,8 +98,8 @@ class UniBuddyApi {
             Dio(
               BaseOptions(
                 baseUrl: baseUrl ?? ApiConfig.baseUrl,
-                connectTimeout: const Duration(seconds: 15),
-                receiveTimeout: const Duration(seconds: 90),
+                connectTimeout: const Duration(seconds: 120),
+                receiveTimeout: const Duration(seconds: 120),
                 headers: const {'Content-Type': 'application/json'},
               ),
             );

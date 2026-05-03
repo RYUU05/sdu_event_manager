@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:flutter/foundation.dart';
 
@@ -10,12 +11,11 @@ class ApiConfig {
   static String get baseUrl {
     const fromEnv = String.fromEnvironment('API_BASE_URL');
     if (fromEnv.isNotEmpty) return fromEnv;
-    if (kIsWeb) return 'http://localhost:8000';
-    if (Platform.isAndroid) return 'http://10.0.2.2:8000';
-    return 'http://127.0.0.1:8000';
+    // Используем живой сервер Render
+    return 'https://sdu-event-back.onrender.com';
   }
 
   static String get syncApiKey {
-    return const String.fromEnvironment('SYNC_API_KEY', defaultValue: 'default_sync_key');
+    return dotenv.env['SYNC_API_KEY'] ?? 'default_sync_key';
   }
 }

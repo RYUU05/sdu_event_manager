@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:event_manager/core/di/injection.dart';
 import 'package:event_manager/core/extensions/context_extensions.dart';
@@ -25,9 +26,12 @@ class _UniBuddyChatPageState extends State<UniBuddyChatPage> {
   final _api = getIt<UniBuddyApi>();
   final _messages = <_ChatMessage>[];
   bool _loading = false;
+  bool _isWakingUp = false;
+  Timer? _wakeupTimer;
 
   @override
   void dispose() {
+    _wakeupTimer?.cancel();
     _input.dispose();
     _scroll.dispose();
     super.dispose();
@@ -40,9 +44,18 @@ class _UniBuddyChatPageState extends State<UniBuddyChatPage> {
     setState(() {
       _messages.add(_ChatMessage(text: q, isUser: true));
       _loading = true;
+      _isWakingUp = false;
     });
     _input.clear();
     _scrollDown();
+
+    _wakeupTimer?.cancel();
+    _wakeupTimer = Timer(const Duration(seconds: 5), () {
+      if (mounted && _loading) {
+        setState(() => _isWakingUp = true);
+        _scrollDown();
+      }
+    });
 
     try {
       final res = await _api.ask(q);
@@ -50,6 +63,7 @@ class _UniBuddyChatPageState extends State<UniBuddyChatPage> {
       setState(() {
         _messages.add(_ChatMessage(text: res.answer, isUser: false));
         _loading = false;
+        _isWakingUp = false;
       });
     } catch (e) {
       if (!mounted) return;
@@ -61,8 +75,10 @@ class _UniBuddyChatPageState extends State<UniBuddyChatPage> {
           ),
         );
         _loading = false;
+        _isWakingUp = false;
       });
     }
+    _wakeupTimer?.cancel();
     _scrollDown();
   }
 
@@ -115,14 +131,26 @@ class _UniBuddyChatPageState extends State<UniBuddyChatPage> {
                           itemCount: _messages.length + (_loading ? 1 : 0),
                           itemBuilder: (context, index) {
                             if (_loading && index == _messages.length) {
-                              return const Padding(
-                                padding: EdgeInsets.all(16),
-                                child: Center(
-                                  child: SizedBox(
-                                    width: 28,
-                                    height: 28,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
-                                  ),
+                              return Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  children: [
+                                    const SizedBox(
+                                      width: 28,
+                                      height: 28,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    ),
+                                    if (_isWakingUp) ...[
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        'UniBuddy просыпается (до 2 минут)...',
+                                        style: TextStyle(
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ]
+                                  ],
                                 ),
                               );
                             }
