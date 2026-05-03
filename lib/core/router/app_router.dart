@@ -15,6 +15,7 @@ class AppRouter extends RootStackRouter {
       guards: [AuthGuard()],
       children: [
         AutoRoute(path: 'home', page: HomeRoute.page),
+        AutoRoute(path: 'unibuddy', page: UniBuddyRoute.page),
         AutoRoute(path: 'my-events', page: MyEventsRoute.page),
         AutoRoute(path: 'setting', page: SettingsRoute.page),
       ],

@@ -8,6 +8,7 @@ import '../../../../core/router/app_router.gr.dart';
 import '../../../../core/di/injection.dart';
 import '../../../auth/presentation/bloc/auth_bloc_simple.dart';
 import '../../../auth/domain/entities/user_entity.dart';
+import '../../../unibuddy/data/unibuddy_api.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
 import '../bloc/home_state.dart';
@@ -27,6 +28,11 @@ class _HomePageState extends State<HomePage> {
   String _searchQuery = '';
   String? _selectedCategory;
 
+  bool _recLoading = false;
+  bool _recFailed = false;
+  String? _recExplanation;
+  List<String> _recTitles = [];
+
   static const _categories = [
     'Academic', 'Sports', 'Culture', 'Social', 'Career', 'Other',
   ];
@@ -36,6 +42,61 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _homeBloc = getIt<HomeBloc>();
     _homeBloc.add(const LoadHomeData());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadRecommendations());
+  }
+
+  void _loadRecommendations() {
+    final auth = context.read<AuthBloc>().state;
+    if (auth is! Authenticated) return;
+    if (auth.user.role != UserRole.student) {
+      setState(() {
+        _recLoading = false;
+        _recFailed = false;
+        _recExplanation = null;
+        _recTitles = [];
+      });
+      return;
+    }
+    if (auth.user.interests.isEmpty) {
+      setState(() {
+        _recLoading = false;
+        _recFailed = false;
+        _recExplanation = null;
+        _recTitles = [];
+      });
+      return;
+    }
+
+    setState(() {
+      _recLoading = true;
+      _recFailed = false;
+    });
+
+    getIt<UniBuddyApi>()
+        .recommend(
+      interests: auth.user.interests,
+      userName: auth.user.name,
+    )
+        .then((res) {
+      if (!mounted) return;
+      setState(() {
+        _recLoading = false;
+        _recExplanation = res.explanation;
+        _recTitles = res.recommendations
+            .map((e) => e.title ?? '')
+            .where((s) => s.isNotEmpty)
+            .toList();
+        _recFailed = false;
+      });
+    }).catchError((_) {
+      if (!mounted) return;
+      setState(() {
+        _recLoading = false;
+        _recFailed = true;
+        _recExplanation = null;
+        _recTitles = [];
+      });
+    });
   }
 
   @override
@@ -47,6 +108,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _refresh() async {
     _homeBloc.add(const LoadHomeData());
+    _loadRecommendations();
     // Give a small delay so the pull-to-refresh indicator shows
     await Future.delayed(const Duration(milliseconds: 600));
   }
@@ -74,7 +136,16 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _homeBloc,
-      child: Scaffold(
+      child: BlocListener<AuthBloc, AuthState>(
+        listenWhen: (prev, curr) {
+          if (prev is Authenticated && curr is Authenticated) {
+            return prev.user.interests.join('|') !=
+                curr.user.interests.join('|');
+          }
+          return false;
+        },
+        listener: (_, __) => _loadRecommendations(),
+        child: Scaffold(
         appBar: AppBar(
           title: Text(context.localization.appTitle),
           elevation: 0,
@@ -95,6 +166,93 @@ class _HomePageState extends State<HomePage> {
         ),
         body: Column(
           children: [
+            BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, authState) {
+                if (authState is! Authenticated ||
+                    authState.user.role != UserRole.student) {
+                  return const SizedBox.shrink();
+                }
+                if (_recLoading && _recExplanation == null) {
+                  return const Padding(
+                    padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    child: LinearProgressIndicator(),
+                  );
+                }
+                if (authState.user.interests.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    child: Card(
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.interests_outlined,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        title: Text(context.localization.fillInterestsHint),
+                        dense: true,
+                      ),
+                    ),
+                  );
+                }
+                if (_recFailed) {
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    child: Text(
+                      context.localization.recoCouldNotLoad,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                        fontSize: 13,
+                      ),
+                    ),
+                  );
+                }
+                if (_recExplanation == null || _recExplanation!.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.auto_awesome,
+                                size: 20,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                context.localization.recommendationForYou,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(_recExplanation!),
+                          if (_recTitles.isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              _recTitles.join(' · '),
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
             // ── Search bar ──────────────────────────────────────────────
             Padding(
               padding:
@@ -306,7 +464,8 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildEmptyState(BuildContext context) {

@@ -61,12 +61,14 @@ class AuthRepositoryImpl implements AuthRepository {
       final roleStr = doc.data()?['role'] ?? 'student';
       final role = roleStr == 'club' ? UserRole.club : UserRole.student;
 
+      final data = doc.data();
       return AuthSuccess(
         UserEntity(
           id: result.user!.uid,
           email: email,
-          name: doc.data()?['name'] ?? email,
+          name: data?['name'] ?? email,
           role: role,
+          interests: UserEntity.interestsFromFirestore(data?['interests']),
         ),
       );
     } on FirebaseAuthException catch (e) {
@@ -109,6 +111,7 @@ class AuthRepositoryImpl implements AuthRepository {
         'email': email,
         'name': name,
         'role': roleStr,
+        'interests': <String>[],
         'createdAt': FieldValue.serverTimestamp(),
       });
 
@@ -132,6 +135,7 @@ class AuthRepositoryImpl implements AuthRepository {
           email: email,
           name: name,
           role: role,
+          interests: const [],
         ),
       );
     } on FirebaseAuthException catch (e) {
@@ -165,11 +169,13 @@ class AuthRepositoryImpl implements AuthRepository {
       final roleStr = doc.data()?['role'] ?? 'student';
       final role = roleStr == 'club' ? UserRole.club : UserRole.student;
 
+      final data = doc.data();
       return UserEntity(
         id: user.uid,
         email: user.email ?? '',
-        name: doc.data()?['name'] ?? user.email ?? '',
+        name: data?['name'] ?? user.email ?? '',
         role: role,
+        interests: UserEntity.interestsFromFirestore(data?['interests']),
       );
     } catch (e) {
       return null;
@@ -186,16 +192,30 @@ class AuthRepositoryImpl implements AuthRepository {
         final roleStr = doc.data()?['role'] ?? 'student';
         final role = roleStr == 'club' ? UserRole.club : UserRole.student;
 
+        final data = doc.data();
         return UserEntity(
           id: user.uid,
           email: user.email ?? '',
-          name: doc.data()?['name'] ?? user.email ?? '',
+          name: data?['name'] ?? user.email ?? '',
           role: role,
+          interests: UserEntity.interestsFromFirestore(data?['interests']),
         );
       } catch (e) {
         return null;
       }
     });
+  }
+
+  @override
+  Future<UserEntity?> updateInterests(List<String> interests) async {
+    final user = _auth.currentUser;
+    if (user == null) return null;
+
+    await _db.collection('users').doc(user.uid).set(
+          {'interests': interests},
+          SetOptions(merge: true),
+        );
+    return getCurrentUser();
   }
 
   @override

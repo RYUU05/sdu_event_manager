@@ -13,4 +13,7 @@ abstract class AuthRepository {
   Future<UserEntity?> getCurrentUser();
   Stream<UserEntity?> get user;
   Future<void> resetPassword(String email);
+
+  /// Обновляет список интересов студента в Firestore и возвращает актуальный профиль.
+  Future<UserEntity?> updateInterests(List<String> interests);
 }

@@ -9,7 +9,7 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:auto_route/auto_route.dart' as _i11;
+import 'package:auto_route/auto_route.dart' as _i12;
 import 'package:event_manager/core/widgets/app_shell.dart' as _i1;
 import 'package:event_manager/features/auth/presentation/pages/forgot_password_page.dart'
     as _i5;
@@ -19,7 +19,7 @@ import 'package:event_manager/features/auth/presentation/pages/register_page.dar
     as _i9;
 import 'package:event_manager/features/events/presentation/pages/create_event_page.dart'
     as _i3;
-import 'package:event_manager/features/home/domain/entities/event.dart' as _i13;
+import 'package:event_manager/features/home/domain/entities/event.dart' as _i14;
 import 'package:event_manager/features/home/presentation/pages/club_detail_page.dart'
     as _i2;
 import 'package:event_manager/features/home/presentation/pages/event_detail_page.dart'
@@ -30,17 +30,19 @@ import 'package:event_manager/features/my_events/presentation/pages/my_events_pa
     as _i8;
 import 'package:event_manager/features/settings/presentation/pages/settings_page.dart'
     as _i10;
-import 'package:flutter/material.dart' as _i12;
+import 'package:event_manager/features/unibuddy/presentation/pages/unibuddy_chat_page.dart'
+    as _i11;
+import 'package:flutter/material.dart' as _i13;
 
 /// generated route for
 /// [_i1.AppShell]
-class AppShellRoute extends _i11.PageRouteInfo<void> {
-  const AppShellRoute({List<_i11.PageRouteInfo>? children})
+class AppShellRoute extends _i12.PageRouteInfo<void> {
+  const AppShellRoute({List<_i12.PageRouteInfo>? children})
     : super(AppShellRoute.name, initialChildren: children);
 
   static const String name = 'AppShellRoute';
 
-  static _i11.PageInfo page = _i11.PageInfo(
+  static _i12.PageInfo page = _i12.PageInfo(
     name,
     builder: (data) {
       return const _i1.AppShell();
@@ -50,12 +52,12 @@ class AppShellRoute extends _i11.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i2.ClubDetailPage]
-class ClubDetailRoute extends _i11.PageRouteInfo<ClubDetailRouteArgs> {
+class ClubDetailRoute extends _i12.PageRouteInfo<ClubDetailRouteArgs> {
   ClubDetailRoute({
-    _i12.Key? key,
+    _i13.Key? key,
     required String clubId,
     required String clubName,
-    List<_i11.PageRouteInfo>? children,
+    List<_i12.PageRouteInfo>? children,
   }) : super(
          ClubDetailRoute.name,
          args: ClubDetailRouteArgs(
@@ -68,7 +70,7 @@ class ClubDetailRoute extends _i11.PageRouteInfo<ClubDetailRouteArgs> {
 
   static const String name = 'ClubDetailRoute';
 
-  static _i11.PageInfo page = _i11.PageInfo(
+  static _i12.PageInfo page = _i12.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<ClubDetailRouteArgs>();
@@ -88,7 +90,7 @@ class ClubDetailRouteArgs {
     required this.clubName,
   });
 
-  final _i12.Key? key;
+  final _i13.Key? key;
 
   final String clubId;
 
@@ -114,11 +116,11 @@ class ClubDetailRouteArgs {
 
 /// generated route for
 /// [_i3.CreateEventPage]
-class CreateEventRoute extends _i11.PageRouteInfo<CreateEventRouteArgs> {
+class CreateEventRoute extends _i12.PageRouteInfo<CreateEventRouteArgs> {
   CreateEventRoute({
-    _i12.Key? key,
-    _i13.Event? eventToEdit,
-    List<_i11.PageRouteInfo>? children,
+    _i13.Key? key,
+    _i14.Event? eventToEdit,
+    List<_i12.PageRouteInfo>? children,
   }) : super(
          CreateEventRoute.name,
          args: CreateEventRouteArgs(key: key, eventToEdit: eventToEdit),
@@ -127,7 +129,7 @@ class CreateEventRoute extends _i11.PageRouteInfo<CreateEventRouteArgs> {
 
   static const String name = 'CreateEventRoute';
 
-  static _i11.PageInfo page = _i11.PageInfo(
+  static _i12.PageInfo page = _i12.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<CreateEventRouteArgs>(
@@ -141,9 +143,9 @@ class CreateEventRoute extends _i11.PageRouteInfo<CreateEventRouteArgs> {
 class CreateEventRouteArgs {
   const CreateEventRouteArgs({this.key, this.eventToEdit});
 
-  final _i12.Key? key;
+  final _i13.Key? key;
 
-  final _i13.Event? eventToEdit;
+  final _i14.Event? eventToEdit;
 
   @override
   String toString() {
@@ -163,11 +165,11 @@ class CreateEventRouteArgs {
 
 /// generated route for
 /// [_i4.EventDetailPage]
-class EventDetailRoute extends _i11.PageRouteInfo<EventDetailRouteArgs> {
+class EventDetailRoute extends _i12.PageRouteInfo<EventDetailRouteArgs> {
   EventDetailRoute({
-    _i12.Key? key,
+    _i13.Key? key,
     required String eventId,
-    List<_i11.PageRouteInfo>? children,
+    List<_i12.PageRouteInfo>? children,
   }) : super(
          EventDetailRoute.name,
          args: EventDetailRouteArgs(key: key, eventId: eventId),
@@ -176,7 +178,7 @@ class EventDetailRoute extends _i11.PageRouteInfo<EventDetailRouteArgs> {
 
   static const String name = 'EventDetailRoute';
 
-  static _i11.PageInfo page = _i11.PageInfo(
+  static _i12.PageInfo page = _i12.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<EventDetailRouteArgs>();
@@ -188,7 +190,7 @@ class EventDetailRoute extends _i11.PageRouteInfo<EventDetailRouteArgs> {
 class EventDetailRouteArgs {
   const EventDetailRouteArgs({this.key, required this.eventId});
 
-  final _i12.Key? key;
+  final _i13.Key? key;
 
   final String eventId;
 
@@ -210,13 +212,13 @@ class EventDetailRouteArgs {
 
 /// generated route for
 /// [_i5.ForgotPasswordPage]
-class ForgotPasswordRoute extends _i11.PageRouteInfo<void> {
-  const ForgotPasswordRoute({List<_i11.PageRouteInfo>? children})
+class ForgotPasswordRoute extends _i12.PageRouteInfo<void> {
+  const ForgotPasswordRoute({List<_i12.PageRouteInfo>? children})
     : super(ForgotPasswordRoute.name, initialChildren: children);
 
   static const String name = 'ForgotPasswordRoute';
 
-  static _i11.PageInfo page = _i11.PageInfo(
+  static _i12.PageInfo page = _i12.PageInfo(
     name,
     builder: (data) {
       return const _i5.ForgotPasswordPage();
@@ -226,13 +228,13 @@ class ForgotPasswordRoute extends _i11.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i6.HomePage]
-class HomeRoute extends _i11.PageRouteInfo<void> {
-  const HomeRoute({List<_i11.PageRouteInfo>? children})
+class HomeRoute extends _i12.PageRouteInfo<void> {
+  const HomeRoute({List<_i12.PageRouteInfo>? children})
     : super(HomeRoute.name, initialChildren: children);
 
   static const String name = 'HomeRoute';
 
-  static _i11.PageInfo page = _i11.PageInfo(
+  static _i12.PageInfo page = _i12.PageInfo(
     name,
     builder: (data) {
       return const _i6.HomePage();
@@ -242,13 +244,13 @@ class HomeRoute extends _i11.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i7.LoginPage]
-class LoginRoute extends _i11.PageRouteInfo<void> {
-  const LoginRoute({List<_i11.PageRouteInfo>? children})
+class LoginRoute extends _i12.PageRouteInfo<void> {
+  const LoginRoute({List<_i12.PageRouteInfo>? children})
     : super(LoginRoute.name, initialChildren: children);
 
   static const String name = 'LoginRoute';
 
-  static _i11.PageInfo page = _i11.PageInfo(
+  static _i12.PageInfo page = _i12.PageInfo(
     name,
     builder: (data) {
       return const _i7.LoginPage();
@@ -258,13 +260,13 @@ class LoginRoute extends _i11.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i8.MyEventsPage]
-class MyEventsRoute extends _i11.PageRouteInfo<void> {
-  const MyEventsRoute({List<_i11.PageRouteInfo>? children})
+class MyEventsRoute extends _i12.PageRouteInfo<void> {
+  const MyEventsRoute({List<_i12.PageRouteInfo>? children})
     : super(MyEventsRoute.name, initialChildren: children);
 
   static const String name = 'MyEventsRoute';
 
-  static _i11.PageInfo page = _i11.PageInfo(
+  static _i12.PageInfo page = _i12.PageInfo(
     name,
     builder: (data) {
       return const _i8.MyEventsPage();
@@ -274,13 +276,13 @@ class MyEventsRoute extends _i11.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i9.RegisterPage]
-class RegisterRoute extends _i11.PageRouteInfo<void> {
-  const RegisterRoute({List<_i11.PageRouteInfo>? children})
+class RegisterRoute extends _i12.PageRouteInfo<void> {
+  const RegisterRoute({List<_i12.PageRouteInfo>? children})
     : super(RegisterRoute.name, initialChildren: children);
 
   static const String name = 'RegisterRoute';
 
-  static _i11.PageInfo page = _i11.PageInfo(
+  static _i12.PageInfo page = _i12.PageInfo(
     name,
     builder: (data) {
       return const _i9.RegisterPage();
@@ -290,16 +292,32 @@ class RegisterRoute extends _i11.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i10.SettingsPage]
-class SettingsRoute extends _i11.PageRouteInfo<void> {
-  const SettingsRoute({List<_i11.PageRouteInfo>? children})
+class SettingsRoute extends _i12.PageRouteInfo<void> {
+  const SettingsRoute({List<_i12.PageRouteInfo>? children})
     : super(SettingsRoute.name, initialChildren: children);
 
   static const String name = 'SettingsRoute';
 
-  static _i11.PageInfo page = _i11.PageInfo(
+  static _i12.PageInfo page = _i12.PageInfo(
     name,
     builder: (data) {
       return const _i10.SettingsPage();
+    },
+  );
+}
+
+/// generated route for
+/// [_i11.UniBuddyChatPage]
+class UniBuddyRoute extends _i12.PageRouteInfo<void> {
+  const UniBuddyRoute({List<_i12.PageRouteInfo>? children})
+    : super(UniBuddyRoute.name, initialChildren: children);
+
+  static const String name = 'UniBuddyRoute';
+
+  static _i12.PageInfo page = _i12.PageInfo(
+    name,
+    builder: (data) {
+      return const _i11.UniBuddyChatPage();
     },
   );
 }

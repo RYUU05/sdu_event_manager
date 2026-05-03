@@ -10,9 +10,15 @@ class AppShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AutoTabsScaffold(
-      routes: const [HomeRoute(), MyEventsRoute(), SettingsRoute()],
+      routes: const [
+        HomeRoute(),
+        UniBuddyRoute(),
+        MyEventsRoute(),
+        SettingsRoute(),
+      ],
       bottomNavigationBuilder: (context, tabsRouter) {
         return BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
           currentIndex: tabsRouter.activeIndex,
           onTap: tabsRouter.setActiveIndex,
           items: [
@@ -20,6 +26,11 @@ class AppShell extends StatelessWidget {
               icon: const Icon(Icons.home_outlined),
               activeIcon: const Icon(Icons.home),
               label: context.localization.firstNavBar,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.chat_bubble_outline),
+              activeIcon: const Icon(Icons.chat_bubble),
+              label: context.localization.unibuddyNavBar,
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.bookmarks_outlined),

@@ -5,13 +5,23 @@ class UserEntity {
   final String email;
   final String name;
   final UserRole role;
+  /// Теги интересов для POST /recommend (Firestore `users.interests`).
+  final List<String> interests;
 
   const UserEntity({
     required this.id,
     required this.email,
     required this.name,
     required this.role,
+    this.interests = const [],
   });
+
+  static List<String> interestsFromFirestore(dynamic raw) {
+    if (raw is List) {
+      return raw.map((e) => e.toString().trim()).where((s) => s.isNotEmpty).toList();
+    }
+    return const [];
+  }
 
   factory UserEntity.fromJson(Map<String, dynamic> json) {
     final roleStr = json['role'] as String? ?? 'student';
@@ -22,6 +32,7 @@ class UserEntity {
       email: json['email'] as String,
       name: json['name'] as String? ?? json['email'] as String,
       role: role,
+      interests: interestsFromFirestore(json['interests']),
     );
   }
 
@@ -31,6 +42,7 @@ class UserEntity {
       'email': email,
       'name': name,
       'role': role == UserRole.club ? 'club' : 'student',
+      'interests': interests,
     };
   }
 
@@ -39,12 +51,14 @@ class UserEntity {
     String? email,
     String? name,
     UserRole? role,
+    List<String>? interests,
   }) {
     return UserEntity(
       id: id ?? this.id,
       email: email ?? this.email,
       name: name ?? this.name,
       role: role ?? this.role,
+      interests: interests ?? this.interests,
     );
   }
 }

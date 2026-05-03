@@ -1,8 +1,12 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
 
 /// The translations for Kazakh (`kk`).
 class AppLocalizationsKk extends AppLocalizations {
-  AppLocalizationsKk([super.locale = 'kk']);
+  AppLocalizationsKk([String locale = 'kk']) : super(locale);
 
   @override
   String get appTitle => 'SDU Events';
@@ -26,19 +30,19 @@ class AppLocalizationsKk extends AppLocalizations {
   String get selectingLang => 'Тілді таңдаңыз';
 
   @override
-  String get cancel => 'Болдырмау';
+  String get cancel => 'Cancel';
 
   @override
   String get createEvent => 'Іс-шара құру';
 
   @override
-  String get firstNavBar => 'Іс-шаралар';
+  String get firstNavBar => 'Events';
 
   @override
-  String get secondNavBar => 'Тілектер тізімі';
+  String get secondNavBar => 'Wishlist';
 
   @override
-  String get thirdNavBar => 'Баптаулар';
+  String get thirdNavBar => 'Settings';
 
   @override
   String get account => 'Аккаунт';
@@ -200,64 +204,37 @@ class AppLocalizationsKk extends AppLocalizations {
   String get eventCreated => 'Іс-шара құрылды!';
 
   @override
-  String get organizer => 'Ұйымдастырушы';
+  String get unibuddyTitle => 'UniBuddy';
 
   @override
-  String get participantsCount => 'қатысушы';
+  String get unibuddyNavBar => 'UniBuddy';
 
   @override
-  String get unlimitedParticipants => 'қатысушы (шектеусіз)';
+  String get unibuddyInputHint => 'Іс-шаралар немесе кампус туралы сұраңыз…';
 
   @override
-  String get descriptionLabel => 'Сипаттамасы';
+  String get unibuddyEmptyHint => 'Мысалы: бүгінгі іс-шаралар қайда, немесе каратэ — жауап кампустың деректерінен.';
 
   @override
-  String get noDescription => 'Сипаттамасы жоқ';
+  String get recommendationForYou => 'Сізге арналған';
 
   @override
-  String get participate => 'Қатысу';
+  String get interestsLabel => 'Қызығушылықтар (үтірмен)';
 
   @override
-  String get cancelParticipation => 'Қатысуды тоқтату';
+  String get interestsHint => 'мысалы: би, IT, каратэ';
 
   @override
-  String get noSeats => 'Орын жоқ';
+  String get interestsSaved => 'Қызығушылықтар сақталды';
 
   @override
-  String get myEventsShortcut => 'Менің іс-шараларым';
+  String get fillInterestsHint => 'Жеке ұсыныстар үшін Баптаулардан қызығушылықтарды қосыңыз.';
 
   @override
-  String get eventNotFound => 'Іс-шара табылмады';
+  String get recoCouldNotLoad => 'Ұсыныстарды жүктеу мүмкін болмады';
 
   @override
-  String get editTooltip => 'Іс-шараны өңдеу';
-
-  @override
-  String get deleteTooltip => 'Іс-шараны жою';
-
-  @override
-  String get deleteConfirmTitle => 'Іс-шараны жою керек пе?';
-
-  @override
-  String get deleteConfirmContent => 'Бұл әрекетті болдырмау мүмкін емес.';
-
-  @override
-  String get memberCount => 'қатысушы';
-
-  @override
-  String get aboutClub => 'Клуб туралы';
-
-  @override
-  String get following => 'Сіз жазылдыңыз';
-
-  @override
-  String get follow => 'Жазылу';
-
-  @override
-  String get clubEvents => 'Клуб іс-шаралары';
-
-  @override
-  String get noClubEvents => 'Бұл клубтың әзірге іс-шаралары жоқ';
+  String get welcome => 'Қош келдіңіз';
 
   @override
   String get email => 'Email';
@@ -266,46 +243,58 @@ class AppLocalizationsKk extends AppLocalizations {
   String get password => 'Құпия сөз';
 
   @override
-  String get login => 'Кіру';
+  String get forgotPassword => 'Құпия сөзді ұмыттыңыз ба?';
 
   @override
-  String get register => 'Тіркелу';
+  String get login => 'Кіру';
 
   @override
   String get noAccount => 'Аккаунт жоқ па?';
 
   @override
-  String get haveAccount => 'Аккаунт бар ма?';
+  String get register => 'Тіркелу';
 
   @override
-  String get forgotPassword => 'Құпия сөзді ұмыттыңыз ба?';
+  String get emptyFields => 'Барлық өрістерді толтырыңыз';
 
   @override
-  String get welcomeBack => 'Қош келдіңіз';
+  String get invalidEmail => 'Жарамсыз email';
 
   @override
-  String get welcome => 'Қош келдіңіз';
+  String get shortPassword => 'Құпия сөз тым қысқа (мин. 8 таңба)';
 
   @override
-  String get invalidEmail => 'Дұрыс email енгізіңіз';
-
-  @override
-  String get shortPassword => 'Құпия сөз кемінде 6 таңбадан тұруы керек';
-
-  @override
-  String get emptyFields => 'Email мен құпия сөзді енгізіңіз';
-
-  @override
-  String get authErrorWrong => 'Email немесе құпия сөз қате';
+  String get authErrorWrong => 'Қате email немесе құпия сөз';
 
   @override
   String get authErrorNotFound => 'Пайдаланушы табылмады';
 
   @override
-  String get authErrorTooMany => 'Әрекет тым көп. Кейінірек көріңіз';
+  String get authErrorTooMany => 'Тым көп әрекет. Кейінірек қайталаңыз.';
 
   @override
-  String get authErrorNetwork => 'Желіге қосылу жоқ';
+  String get authErrorNetwork => 'Желі қатесі';
+
+  @override
+  String get enterEmail => 'Email енгізіңіз';
+
+  @override
+  String get resetPassword => 'Құпия сөзді қалпына келтіру';
+
+  @override
+  String get emailSent => 'Хат жіберілді';
+
+  @override
+  String get resetPasswordPrompt => 'Email енгізіңіз — қалпына келтіру сілтемесін жібереміз.';
+
+  @override
+  String get sendEmail => 'Жіберу';
+
+  @override
+  String get enterClubName => 'Клуб атауын енгізіңіз';
+
+  @override
+  String get enterNameSurname => 'Аты-жөнді енгізіңіз';
 
   @override
   String get student => 'Студент';
@@ -314,13 +303,13 @@ class AppLocalizationsKk extends AppLocalizations {
   String get club => 'Клуб';
 
   @override
-  String get firstName => 'Есім';
+  String get clubNameLabel => 'Клуб атауы';
+
+  @override
+  String get firstName => 'Аты';
 
   @override
   String get lastName => 'Тегі';
-
-  @override
-  String get clubNameLabel => 'Клуб атауы';
 
   @override
   String get registerAsClub => 'Клуб ретінде тіркелу';
@@ -329,23 +318,59 @@ class AppLocalizationsKk extends AppLocalizations {
   String get registerAsStudent => 'Студент ретінде тіркелу';
 
   @override
-  String get enterEmail => 'Email енгізіңіз';
+  String get haveAccount => 'Аккаунт бар ма?';
 
   @override
-  String get enterClubName => 'Клуб атауын енгізіңіз';
+  String get memberCount => 'қатысушы';
 
   @override
-  String get enterNameSurname => 'Есіміңіз бен тегіңізді енгізіңіз';
+  String get aboutClub => 'Клуб туралы';
 
   @override
-  String get resetPassword => 'Құпия сөзді қалпына келтіру';
+  String get following => 'Жазылған';
 
   @override
-  String get resetPasswordPrompt => 'Аккаунтқа тіркелген email-ды енгізіңіз. Біз құпия сөзді өзгертуге сілтеме жібереміз.';
+  String get follow => 'Жазылу';
 
   @override
-  String get sendEmail => 'Хат жіберу';
+  String get eventNotFound => 'Іс-шара табылмады';
 
   @override
-  String get emailSent => 'Хат жіберілді! Поштаңызды тексеріңіз.';
+  String get editTooltip => 'Өңдеу';
+
+  @override
+  String get deleteTooltip => 'Жою';
+
+  @override
+  String get deleteConfirmTitle => 'Іс-шараны жою керек пе?';
+
+  @override
+  String get deleteConfirmContent => 'Бұл әрекетті болдырмау мүмкін емес.';
+
+  @override
+  String get organizer => 'Ұйымдастырушы';
+
+  @override
+  String get participantsCount => 'орын';
+
+  @override
+  String get unlimitedParticipants => 'қатысушы (шектеусіз)';
+
+  @override
+  String get descriptionLabel => 'Сипаттама';
+
+  @override
+  String get noDescription => 'Сипаттама жоқ';
+
+  @override
+  String get noSeats => 'Орын жоқ';
+
+  @override
+  String get cancelParticipation => 'Қатысуды тоқтату';
+
+  @override
+  String get participate => 'Қатысу';
+
+  @override
+  String get myEventsShortcut => 'Менің іс-шараларым';
 }

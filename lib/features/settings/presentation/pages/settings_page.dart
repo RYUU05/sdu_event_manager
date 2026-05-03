@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/providers/language_provider.dart';
 import '../../../../core/router/app_router.gr.dart';
 import '../../../../core/di/injection.dart';
+import '../../../auth/domain/repositories/auth_repository.dart';
+import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/bloc/auth_bloc_simple.dart';
 import '../bloc/settings_bloc.dart';
 
@@ -18,6 +20,34 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   late SettingsBloc settingsBloc;
+  final _interestsCtrl = TextEditingController();
+  bool _savingInterests = false;
+
+  List<String> _parseInterests(String raw) {
+    return raw
+        .split(',')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+  }
+
+  Future<void> _saveInterests(BuildContext context) async {
+    if (_savingInterests) return;
+    setState(() => _savingInterests = true);
+    try {
+      final repo = sl<AuthRepository>();
+      final list = _parseInterests(_interestsCtrl.text);
+      await repo.updateInterests(list);
+      if (context.mounted) {
+        context.read<AuthBloc>().add(RefreshProfileRequested());
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.localization.interestsSaved)),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _savingInterests = false);
+    }
+  }
 
   @override
   void initState() {
@@ -25,10 +55,17 @@ class _SettingsPageState extends State<SettingsPage> {
     // Используем getIt из injection.dart
     settingsBloc = sl<SettingsBloc>(); 
     settingsBloc.add(LoadSettingsEvent());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final u = sl<AuthBloc>().currentUser;
+      if (u != null && u.role == UserRole.student && u.interests.isNotEmpty) {
+        _interestsCtrl.text = u.interests.join(', ');
+      }
+    });
   }
 
   @override
   void dispose() {
+    _interestsCtrl.dispose();
     settingsBloc.close();
     super.dispose();
   }
@@ -96,6 +133,9 @@ class _SettingsPageState extends State<SettingsPage> {
               return Center(child: Text('Error: ${state.message}'));
             }
             if (state is SettingsLoaded) {
+              final authState = context.watch<AuthBloc>().state;
+              final showInterests = authState is Authenticated &&
+                  authState.user.role == UserRole.student;
               return ListView(
                 children: [
                   ListTile(
@@ -111,6 +151,37 @@ class _SettingsPageState extends State<SettingsPage> {
                       child: Text(state.currentRole),
                     ),
                   ),
+                  if (showInterests) ...[
+                    const Divider(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            context.localization.interestsLabel,
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: _interestsCtrl,
+                            maxLines: 2,
+                            decoration: InputDecoration(
+                              hintText: context.localization.interestsHint,
+                              border: const OutlineInputBorder(),
+                              isDense: true,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          FilledButton(
+                            onPressed:
+                                _savingInterests ? null : () => _saveInterests(context),
+                            child: Text(context.localization.save),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   const Divider(),
                   ListTile(
                     leading: const Icon(Icons.language),

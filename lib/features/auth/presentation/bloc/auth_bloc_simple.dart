@@ -34,6 +34,9 @@ class ResetPasswordRequested extends AuthEvent {
   ResetPasswordRequested(this.email);
 }
 
+/// Перечитать профиль из Firestore (например после сохранения интересов).
+class RefreshProfileRequested extends AuthEvent {}
+
 // ─── States ────────────────────────────────────────────────────────────────
 
 abstract class AuthState {}
@@ -68,6 +71,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LogoutRequested>(_onLogout);
     on<UserChanged>(_onUserChanged);
     on<ResetPasswordRequested>(_onResetPassword);
+    on<RefreshProfileRequested>(_onRefreshProfile);
 
     _sub = _repo.user.listen((user) => add(UserChanged(user)));
   }
@@ -112,6 +116,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(Authenticated(event.user!));
     } else {
       emit(Unauthenticated());
+    }
+  }
+
+  Future<void> _onRefreshProfile(
+    RefreshProfileRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    final user = await _repo.getCurrentUser();
+    if (user != null) {
+      emit(Authenticated(user));
     }
   }
 
