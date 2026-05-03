@@ -53,7 +53,7 @@ class InAppNotificationService {
       doc.reference.update({'notified': true});
 
       final context = navigatorKey.currentContext;
-      if (context == null) return;
+      if (context == null || !context.mounted) return;
 
       if (status == 'approved') {
         _showApprovedDialog(context, clubName);

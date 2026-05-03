@@ -373,4 +373,76 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get myEventsShortcut => 'Менің іс-шараларым';
+
+  @override
+  String get profile => 'Профиль';
+
+  @override
+  String get editProfile => 'Профильді өңдеу';
+
+  @override
+  String get avatar => 'Аватар';
+
+  @override
+  String get banner => 'Баннер';
+
+  @override
+  String get clubDescription => 'Клуб сипаттамасы';
+
+  @override
+  String get saveChanges => 'Өзгерістерді сақтау';
+
+  @override
+  String get profileUpdated => 'Профиль сәтті жаңартылды';
+
+  @override
+  String get selectImage => 'Суретті таңдау';
+
+  @override
+  String get moderatorPanel => 'Модератор панелі';
+
+  @override
+  String get reviewClubApplications => 'Клубтарға өтінімдерді қарау';
+
+  @override
+  String get noPendingApplications => 'Қарастырылып жатқан өтінімдер жоқ';
+
+  @override
+  String get approveApplicationTitle => 'Өтінімді мақұлдау керек пе?';
+
+  @override
+  String get approveApplicationContent => 'Клуб құрылады, ал пайдаланушы клуб администраторы болады.';
+
+  @override
+  String get rejectApplicationTitle => 'Өтінімді қабылдамау керек пе?';
+
+  @override
+  String get rejectApplicationContent => 'Сіз бас тарту себебін көрсете аласыз (міндетті емес):';
+
+  @override
+  String get rejectionReasonHint => 'Себебі...';
+
+  @override
+  String get approve => 'Мақұлдау';
+
+  @override
+  String get reject => 'Қабылдамау';
+
+  @override
+  String get successApproved => 'Өтінім мақұлданды!';
+
+  @override
+  String get successRejected => 'Өтінім қабылданбады';
+
+  @override
+  String get createClub => 'Клуб құру';
+
+  @override
+  String get applyForModeration => 'Модерацияға өтінім беру';
+
+  @override
+  String get myApplications => 'Менің өтінімдерім';
+
+  @override
+  String get applicationStatus => 'Жіберілген өтінімдердің күйі';
 }

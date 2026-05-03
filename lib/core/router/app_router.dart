@@ -21,6 +21,11 @@ class AppRouter extends RootStackRouter {
           ],
         ),
         AutoRoute(
+          path: '/profile',
+          page: ProfileRoute.page,
+          guards: [AuthGuard()],
+        ),
+        AutoRoute(
           path: '/create-event',
           page: CreateEventRoute.page,
           guards: [AuthGuard()],

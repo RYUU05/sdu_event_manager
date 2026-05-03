@@ -67,6 +67,9 @@ class AuthRepositoryImpl implements AuthRepository {
           role: UserEntity.roleFromString(data?['role'] as String?),
           interests: UserEntity.interestsFromFirestore(data?['interests']),
           managedClubId: data?['managedClubId'] as String?,
+          avatarUrl: data?['avatarUrl'] as String? ?? '',
+          bannerUrl: data?['bannerUrl'] as String? ?? '',
+          description: data?['description'] as String? ?? '',
         ),
       );
     } on FirebaseAuthException catch (e) {
@@ -159,6 +162,9 @@ class AuthRepositoryImpl implements AuthRepository {
         role: UserEntity.roleFromString(data?['role'] as String?),
         interests: UserEntity.interestsFromFirestore(data?['interests']),
         managedClubId: data?['managedClubId'] as String?,
+        avatarUrl: data?['avatarUrl'] as String? ?? '',
+        bannerUrl: data?['bannerUrl'] as String? ?? '',
+        description: data?['description'] as String? ?? '',
       );
     } catch (e) {
       return null;
@@ -180,6 +186,9 @@ class AuthRepositoryImpl implements AuthRepository {
           role: UserEntity.roleFromString(data?['role'] as String?),
           interests: UserEntity.interestsFromFirestore(data?['interests']),
           managedClubId: data?['managedClubId'] as String?,
+          avatarUrl: data?['avatarUrl'] as String? ?? '',
+          bannerUrl: data?['bannerUrl'] as String? ?? '',
+          description: data?['description'] as String? ?? '',
         );
       } catch (e) {
         return null;
@@ -202,5 +211,48 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> resetPassword(String email) async {
     await _auth.sendPasswordResetEmail(email: email.trim());
+  }
+
+  @override
+  Future<UserEntity?> updateProfile({
+    String? name,
+    String? description,
+    String? avatarUrl,
+    String? bannerUrl,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) return null;
+
+    final updates = <String, dynamic>{};
+    if (name != null) updates['name'] = name;
+    if (description != null) updates['description'] = description;
+    if (avatarUrl != null) updates['avatarUrl'] = avatarUrl;
+    if (bannerUrl != null) updates['bannerUrl'] = bannerUrl;
+
+    if (updates.isEmpty) return getCurrentUser();
+
+    await _db.collection('users').doc(user.uid).set(
+          updates,
+          SetOptions(merge: true),
+        );
+
+    // If user is a club, also update the clubs collection for display in popular clubs etc.
+    final userDoc = await _db.collection('users').doc(user.uid).get();
+    final data = userDoc.data();
+    if (data != null && data['role'] == 'club_admin') {
+      final clubUpdates = <String, dynamic>{};
+      if (name != null) clubUpdates['name'] = name;
+      if (description != null) clubUpdates['description'] = description;
+      if (avatarUrl != null) clubUpdates['imageUrl'] = avatarUrl;
+
+      if (clubUpdates.isNotEmpty) {
+        await _db.collection('clubs').doc(user.uid).set(
+              clubUpdates,
+              SetOptions(merge: true),
+            );
+      }
+    }
+
+    return getCurrentUser();
   }
 }

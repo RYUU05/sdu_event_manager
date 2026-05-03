@@ -16,4 +16,12 @@ abstract class AuthRepository {
 
   /// Обновляет список интересов студента в Firestore и возвращает актуальный профиль.
   Future<UserEntity?> updateInterests(List<String> interests);
+
+  /// Обновляет данные профиля (имя, описание, аватар, баннер).
+  Future<UserEntity?> updateProfile({
+    String? name,
+    String? description,
+    String? avatarUrl,
+    String? bannerUrl,
+  });
 }

@@ -14,6 +14,10 @@ class UserEntity {
   /// ID клуба, которым управляет club_admin (null для student / super_admin)
   final String? managedClubId;
 
+  final String avatarUrl;
+  final String bannerUrl;
+  final String description;
+
   const UserEntity({
     required this.id,
     required this.email,
@@ -21,6 +25,9 @@ class UserEntity {
     required this.role,
     this.interests = const [],
     this.managedClubId,
+    this.avatarUrl = '',
+    this.bannerUrl = '',
+    this.description = '',
   });
 
   // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -64,6 +71,9 @@ class UserEntity {
       role: roleFromString(json['role'] as String?),
       interests: interestsFromFirestore(json['interests']),
       managedClubId: json['managedClubId'] as String?,
+      avatarUrl: json['avatarUrl'] as String? ?? '',
+      bannerUrl: json['bannerUrl'] as String? ?? '',
+      description: json['description'] as String? ?? '',
     );
   }
 
@@ -75,6 +85,9 @@ class UserEntity {
       'role': roleToString(role),
       'interests': interests,
       if (managedClubId != null) 'managedClubId': managedClubId,
+      'avatarUrl': avatarUrl,
+      'bannerUrl': bannerUrl,
+      'description': description,
     };
   }
 
@@ -85,6 +98,9 @@ class UserEntity {
     UserRole? role,
     List<String>? interests,
     String? managedClubId,
+    String? avatarUrl,
+    String? bannerUrl,
+    String? description,
   }) {
     return UserEntity(
       id: id ?? this.id,
@@ -93,6 +109,9 @@ class UserEntity {
       role: role ?? this.role,
       interests: interests ?? this.interests,
       managedClubId: managedClubId ?? this.managedClubId,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      bannerUrl: bannerUrl ?? this.bannerUrl,
+      description: description ?? this.description,
     );
   }
 }

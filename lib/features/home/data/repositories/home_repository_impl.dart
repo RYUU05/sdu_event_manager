@@ -96,7 +96,6 @@ class HomeRepositoryImpl implements HomeRepository {
       await getIt<UniBuddyApi>().sync();
     } catch (e) {
       // Игнорируем ошибку синхронизации, чтобы не ломать UI
-      print('Ошибка при синхронизации с бэкендом: $e');
     }
   }
 }

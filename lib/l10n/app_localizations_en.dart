@@ -373,4 +373,76 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get myEventsShortcut => 'My events';
+
+  @override
+  String get profile => 'Profile';
+
+  @override
+  String get editProfile => 'Edit Profile';
+
+  @override
+  String get avatar => 'Avatar';
+
+  @override
+  String get banner => 'Banner';
+
+  @override
+  String get clubDescription => 'Club Description';
+
+  @override
+  String get saveChanges => 'Save Changes';
+
+  @override
+  String get profileUpdated => 'Profile updated successfully';
+
+  @override
+  String get selectImage => 'Select Image';
+
+  @override
+  String get moderatorPanel => 'Moderator Panel';
+
+  @override
+  String get reviewClubApplications => 'Review club applications';
+
+  @override
+  String get noPendingApplications => 'No pending applications';
+
+  @override
+  String get approveApplicationTitle => 'Approve application?';
+
+  @override
+  String get approveApplicationContent => 'The club will be created and the user will become a club admin.';
+
+  @override
+  String get rejectApplicationTitle => 'Reject application?';
+
+  @override
+  String get rejectApplicationContent => 'You can specify a reason for rejection (optional):';
+
+  @override
+  String get rejectionReasonHint => 'Reason...';
+
+  @override
+  String get approve => 'Approve';
+
+  @override
+  String get reject => 'Reject';
+
+  @override
+  String get successApproved => 'Application approved!';
+
+  @override
+  String get successRejected => 'Application rejected';
+
+  @override
+  String get createClub => 'Create a club';
+
+  @override
+  String get applyForModeration => 'Apply for moderation';
+
+  @override
+  String get myApplications => 'My applications';
+
+  @override
+  String get applicationStatus => 'Status of submitted applications';
 }

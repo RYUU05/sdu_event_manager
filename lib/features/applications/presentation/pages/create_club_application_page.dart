@@ -128,7 +128,7 @@ class _CreateClubApplicationPageState
 
                   // Категория
                   DropdownButtonFormField<String>(
-                    value: _selectedCategory,
+                    initialValue: _selectedCategory,
                     decoration: const InputDecoration(
                       labelText: 'Категория',
                       prefixIcon: Icon(Icons.category_outlined),

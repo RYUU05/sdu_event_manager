@@ -238,7 +238,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
       try {
         await getIt<UniBuddyApi>().sync();
       } catch (e) {
-        print('Ошибка синхронизации: $e');
+        // Log sync error silently or handle as needed
       }
 
     } catch (e) {

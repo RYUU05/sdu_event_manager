@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/extensions/context_extensions.dart';
 import '../../domain/entities/club_application.dart';
 import '../../domain/repositories/application_repository.dart';
 import '../bloc/admin_application_bloc.dart';
@@ -37,7 +38,7 @@ class AdminApplicationsPage extends StatelessWidget {
         },
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('Панель модератора'),
+            title: Text(context.localization.moderatorPanel),
             centerTitle: true,
           ),
           body: StreamBuilder<List<ClubApplication>>(
@@ -53,15 +54,15 @@ class AdminApplicationsPage extends StatelessWidget {
               final applications = snapshot.data ?? [];
 
               if (applications.isEmpty) {
-                return const Center(
+                return Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.inbox_outlined, size: 64, color: Colors.grey),
-                      SizedBox(height: 12),
+                      const Icon(Icons.inbox_outlined, size: 64, color: Colors.grey),
+                      const SizedBox(height: 12),
                       Text(
-                        'Нет заявок на рассмотрении',
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                        context.localization.noPendingApplications,
+                        style: const TextStyle(color: Colors.grey, fontSize: 16),
                       ),
                     ],
                   ),
@@ -149,9 +150,9 @@ class _ApplicationCard extends StatelessWidget {
                             ? null
                             : () => _confirmReject(context, bloc),
                         icon: const Icon(Icons.close, color: Colors.red),
-                        label: const Text(
-                          'Отклонить',
-                          style: TextStyle(color: Colors.red),
+                        label: Text(
+                          context.localization.reject,
+                          style: const TextStyle(color: Colors.red),
                         ),
                       ),
                     ),
@@ -162,7 +163,7 @@ class _ApplicationCard extends StatelessWidget {
                             ? null
                             : () => _confirmApprove(context, bloc),
                         icon: const Icon(Icons.check),
-                        label: const Text('Одобрить'),
+                        label: Text(context.localization.approve),
                         style: FilledButton.styleFrom(
                           backgroundColor: Colors.green,
                         ),
@@ -183,15 +184,14 @@ class _ApplicationCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Одобрить заявку?'),
+        title: Text(context.localization.approveApplicationTitle),
         content: Text(
-          'Клуб "${application.clubName}" будет создан, '
-          'а ${application.userName} получит роль club_admin.',
+          context.localization.approveApplicationContent,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Отмена'),
+            child: Text(context.localization.cancel),
           ),
           FilledButton(
             onPressed: () {
@@ -199,7 +199,7 @@ class _ApplicationCard extends StatelessWidget {
               bloc.add(ApproveApplicationEvent(application));
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.green),
-            child: const Text('Одобрить'),
+            child: Text(context.localization.approve),
           ),
         ],
       ),
@@ -212,18 +212,18 @@ class _ApplicationCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Отклонить заявку?'),
+        title: Text(context.localization.rejectApplicationTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Можете указать причину отказа (необязательно):'),
+            Text(context.localization.rejectApplicationContent),
             const SizedBox(height: 12),
             TextField(
               controller: noteCtrl,
               maxLines: 2,
-              decoration: const InputDecoration(
-                hintText: 'Причина...',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                hintText: context.localization.rejectionReasonHint,
+                border: const OutlineInputBorder(),
                 isDense: true,
               ),
             ),
@@ -232,7 +232,7 @@ class _ApplicationCard extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Отмена'),
+            child: Text(context.localization.cancel),
           ),
           FilledButton(
             onPressed: () {
@@ -243,7 +243,7 @@ class _ApplicationCard extends StatelessWidget {
               ));
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Отклонить'),
+            child: Text(context.localization.reject),
           ),
         ],
       ),

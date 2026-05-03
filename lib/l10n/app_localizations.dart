@@ -828,6 +828,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'My events'**
   String get myEventsShortcut;
+
+  /// No description provided for @profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profile;
+
+  /// No description provided for @editProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get editProfile;
+
+  /// No description provided for @avatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Avatar'**
+  String get avatar;
+
+  /// No description provided for @banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Banner'**
+  String get banner;
+
+  /// No description provided for @clubDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Club Description'**
+  String get clubDescription;
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChanges;
+
+  /// No description provided for @profileUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated successfully'**
+  String get profileUpdated;
+
+  /// No description provided for @selectImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Image'**
+  String get selectImage;
+
+  /// No description provided for @moderatorPanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderator Panel'**
+  String get moderatorPanel;
+
+  /// No description provided for @reviewClubApplications.
+  ///
+  /// In en, this message translates to:
+  /// **'Review club applications'**
+  String get reviewClubApplications;
+
+  /// No description provided for @noPendingApplications.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending applications'**
+  String get noPendingApplications;
+
+  /// No description provided for @approveApplicationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve application?'**
+  String get approveApplicationTitle;
+
+  /// No description provided for @approveApplicationContent.
+  ///
+  /// In en, this message translates to:
+  /// **'The club will be created and the user will become a club admin.'**
+  String get approveApplicationContent;
+
+  /// No description provided for @rejectApplicationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject application?'**
+  String get rejectApplicationTitle;
+
+  /// No description provided for @rejectApplicationContent.
+  ///
+  /// In en, this message translates to:
+  /// **'You can specify a reason for rejection (optional):'**
+  String get rejectApplicationContent;
+
+  /// No description provided for @rejectionReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason...'**
+  String get rejectionReasonHint;
+
+  /// No description provided for @approve.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get approve;
+
+  /// No description provided for @reject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get reject;
+
+  /// No description provided for @successApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Application approved!'**
+  String get successApproved;
+
+  /// No description provided for @successRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Application rejected'**
+  String get successRejected;
+
+  /// No description provided for @createClub.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a club'**
+  String get createClub;
+
+  /// No description provided for @applyForModeration.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply for moderation'**
+  String get applyForModeration;
+
+  /// No description provided for @myApplications.
+  ///
+  /// In en, this message translates to:
+  /// **'My applications'**
+  String get myApplications;
+
+  /// No description provided for @applicationStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status of submitted applications'**
+  String get applicationStatus;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

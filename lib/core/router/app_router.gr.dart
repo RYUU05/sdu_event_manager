@@ -38,6 +38,8 @@ import 'package:event_manager/features/settings/presentation/pages/settings_page
     as _i13;
 import 'package:event_manager/features/unibuddy/presentation/pages/unibuddy_chat_page.dart'
     as _i14;
+import 'package:event_manager/features/settings/presentation/pages/profile_page.dart'
+    as _i18;
 import 'package:flutter/material.dart' as _i16;
 
 /// generated route for
@@ -372,6 +374,22 @@ class UniBuddyRoute extends _i15.PageRouteInfo<void> {
     name,
     builder: (data) {
       return const _i14.UniBuddyChatPage();
+    },
+  );
+}
+
+/// generated route for
+/// [_i18.ProfilePage]
+class ProfileRoute extends _i15.PageRouteInfo<void> {
+  const ProfileRoute({List<_i15.PageRouteInfo>? children})
+    : super(ProfileRoute.name, initialChildren: children);
+
+  static const String name = 'ProfileRoute';
+
+  static _i15.PageInfo page = _i15.PageInfo(
+    name,
+    builder: (data) {
+      return const _i18.ProfilePage();
     },
   );
 }

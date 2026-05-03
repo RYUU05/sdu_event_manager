@@ -373,4 +373,76 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get myEventsShortcut => 'Мои ивенты';
+
+  @override
+  String get profile => 'Профиль';
+
+  @override
+  String get editProfile => 'Редактировать профиль';
+
+  @override
+  String get avatar => 'Аватар';
+
+  @override
+  String get banner => 'Баннер';
+
+  @override
+  String get clubDescription => 'Описание клуба';
+
+  @override
+  String get saveChanges => 'Сохранить изменения';
+
+  @override
+  String get profileUpdated => 'Профиль обновлен успешно';
+
+  @override
+  String get selectImage => 'Выбрать изображение';
+
+  @override
+  String get moderatorPanel => 'Панель модератора';
+
+  @override
+  String get reviewClubApplications => 'Рассмотреть заявки на клубы';
+
+  @override
+  String get noPendingApplications => 'Нет заявок на рассмотрении';
+
+  @override
+  String get approveApplicationTitle => 'Одобрить заявку?';
+
+  @override
+  String get approveApplicationContent => 'Клуб будет создан, а пользователь станет администратором клуба.';
+
+  @override
+  String get rejectApplicationTitle => 'Отклонить заявку?';
+
+  @override
+  String get rejectApplicationContent => 'Вы можете указать причину отказа (необязательно):';
+
+  @override
+  String get rejectionReasonHint => 'Причина...';
+
+  @override
+  String get approve => 'Одобрить';
+
+  @override
+  String get reject => 'Отклонить';
+
+  @override
+  String get successApproved => 'Заявка одобрена!';
+
+  @override
+  String get successRejected => 'Заявка отклонена';
+
+  @override
+  String get createClub => 'Создать клуб';
+
+  @override
+  String get applyForModeration => 'Подать заявку на модерацию';
+
+  @override
+  String get myApplications => 'Мои заявки';
+
+  @override
+  String get applicationStatus => 'Статус поданных заявок';
 }

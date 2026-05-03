@@ -157,6 +157,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                       child: Text(state.currentRole),
                     ),
+                    onTap: () => context.router.push(const ProfileRoute()),
                   ),
 
                   // ── Студент: подать заявку на клуб ──────────────────────
@@ -166,8 +167,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       leading: const Icon(
                           Icons.groups_outlined,
                           color: Colors.deepPurple),
-                      title: const Text('Создать клуб'),
-                      subtitle: const Text('Подать заявку на модерацию'),
+                      title: Text(context.localization.createClub),
+                      subtitle: Text(context.localization.applyForModeration),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () =>
                           context.router.push(const CreateClubApplicationRoute()),
@@ -176,8 +177,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       leading: const Icon(
                           Icons.assignment_outlined,
                           color: Colors.blueGrey),
-                      title: const Text('Мои заявки'),
-                      subtitle: const Text('Статус поданных заявок'),
+                      title: Text(context.localization.myApplications),
+                      subtitle: Text(context.localization.applicationStatus),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () =>
                           context.router.push(const MyApplicationsRoute()),
@@ -191,13 +192,13 @@ class _SettingsPageState extends State<SettingsPage> {
                       leading: const Icon(
                           Icons.admin_panel_settings_outlined,
                           color: Colors.orange),
-                      title: const Text(
-                        'Панель модератора',
-                        style: TextStyle(
+                      title: Text(
+                        context.localization.moderatorPanel,
+                        style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.orange),
                       ),
-                      subtitle: const Text('Рассмотреть заявки на клубы'),
+                      subtitle: Text(context.localization.reviewClubApplications),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () =>
                           context.router.push(const AdminApplicationsRoute()),
