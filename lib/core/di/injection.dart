@@ -2,6 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../features/applications/data/application_repository_impl.dart';
+import '../../features/applications/domain/repositories/application_repository.dart';
+import '../../features/applications/presentation/bloc/admin_application_bloc.dart';
+import '../../features/applications/presentation/bloc/club_application_bloc.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/presentation/bloc/auth_bloc_simple.dart';
@@ -31,7 +35,7 @@ void configureDependencies() {
         firestore: getIt<FirebaseFirestore>(),
         userId: getIt<FirebaseAuth>().currentUser?.uid ?? '',
       ));
-      
+
   getIt.registerLazySingleton<SettingsDataSource>(() => SettingsDataSource());
 
   // 3. Repositories
@@ -49,12 +53,23 @@ void configureDependencies() {
   getIt.registerLazySingleton<SettingsRepository>(
       () => SettingsRepositoryImpl(getIt<SettingsDataSource>()));
 
+  // Репозиторий заявок на клубы
+  getIt.registerLazySingleton<ApplicationRepository>(
+      () => ApplicationRepositoryImpl(db: getIt<FirebaseFirestore>()));
+
   // 4. BLoCs
-  // AuthBloc needs to persist throughout the app, so Singleton
+  // AuthBloc — синглтон, живёт всё время работы приложения
   getIt.registerLazySingleton(() => AuthBloc(getIt<AuthRepository>()));
 
-  // Feature BLoCs usually are Factories so they get re-created cleanly
+  // Feature BLoCs — фабрика (пересоздаётся при каждом открытии экрана)
   getIt.registerFactory(() => HomeBloc(homeRepository: getIt<HomeRepository>()));
   getIt.registerFactory(() => MyEventsBloc(getIt<HomeRepository>()));
-  getIt.registerFactory(() => SettingsBloc(getIt<SettingsRepository>(), getIt<AuthBloc>()));
+  getIt.registerFactory(
+      () => SettingsBloc(getIt<SettingsRepository>(), getIt<AuthBloc>()));
+
+  // BLoC-и для заявок
+  getIt.registerFactory(
+      () => ClubApplicationBloc(getIt<ApplicationRepository>()));
+  getIt.registerFactory(
+      () => AdminApplicationBloc(getIt<ApplicationRepository>()));
 }

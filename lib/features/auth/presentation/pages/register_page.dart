@@ -1,10 +1,10 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:event_manager/features/auth/domain/entities/user_entity.dart';
 import 'package:event_manager/features/auth/presentation/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:event_manager/core/extensions/context_extensions.dart';
 import '../../../../core/router/app_router.gr.dart';
+import '../../../auth/domain/entities/user_entity.dart';
 import '../bloc/auth_bloc_simple.dart';
 
 @RoutePage()
@@ -20,16 +20,11 @@ class _RegisterPageState extends State<RegisterPage> {
   final _passCtrl = TextEditingController();
   final _firstNameCtrl = TextEditingController();
   final _lastNameCtrl = TextEditingController();
-  final _clubNameCtrl = TextEditingController();
 
-  // FocusNodes stored as fields — properly disposed, no memory leaks
   final _emailFocus = FocusNode();
   final _passFocus = FocusNode();
   final _firstNameFocus = FocusNode();
   final _lastNameFocus = FocusNode();
-  final _clubNameFocus = FocusNode();
-
-  bool _isClub = false;
 
   @override
   void dispose() {
@@ -37,12 +32,10 @@ class _RegisterPageState extends State<RegisterPage> {
     _passCtrl.dispose();
     _firstNameCtrl.dispose();
     _lastNameCtrl.dispose();
-    _clubNameCtrl.dispose();
     _emailFocus.dispose();
     _passFocus.dispose();
     _firstNameFocus.dispose();
     _lastNameFocus.dispose();
-    _clubNameFocus.dispose();
     super.dispose();
   }
 
@@ -59,21 +52,12 @@ class _RegisterPageState extends State<RegisterPage> {
       return false;
     }
     if (pass.length < 8) {
-      _showError(context.localization.shortPassword); // Note: I used 'shortPassword' but it says 8 in Russian text, I'll update the localization key text if needed
+      _showError(context.localization.shortPassword);
       return false;
     }
-
-    if (_isClub) {
-      if (_clubNameCtrl.text.trim().isEmpty) {
-        _showError(context.localization.enterClubName);
-        return false;
-      }
-    } else {
-      if (_firstNameCtrl.text.trim().isEmpty ||
-          _lastNameCtrl.text.trim().isEmpty) {
-        _showError(context.localization.enterNameSurname);
-        return false;
-      }
+    if (_firstNameCtrl.text.trim().isEmpty || _lastNameCtrl.text.trim().isEmpty) {
+      _showError(context.localization.enterNameSurname);
+      return false;
     }
     return true;
   }
@@ -81,16 +65,15 @@ class _RegisterPageState extends State<RegisterPage> {
   void _register() {
     if (!_validate()) return;
 
-    final name = _isClub
-        ? _clubNameCtrl.text.trim()
-        : '${_firstNameCtrl.text.trim()} ${_lastNameCtrl.text.trim()}';
+    final name =
+        '${_firstNameCtrl.text.trim()} ${_lastNameCtrl.text.trim()}';
 
-    // Use AuthBloc — consistent with login flow, no direct Firebase calls
+    // Роль всегда student. Стать club_admin — только через заявку.
     context.read<AuthBloc>().add(RegisterRequested(
           _emailCtrl.text.trim(),
           _passCtrl.text,
           name,
-          _isClub ? UserRole.club : UserRole.student,
+          UserRole.student,
         ));
   }
 
@@ -106,7 +89,6 @@ class _RegisterPageState extends State<RegisterPage> {
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is Authenticated) {
-            // Auto-navigate — no need to re-login after registration
             context.router.replace(const AppShellRoute());
           } else if (state is AuthError) {
             _showError(state.message);
@@ -118,7 +100,11 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Column(
               children: [
                 const SizedBox(height: 32),
-                Image.asset('assets/sdu_logo.png', width: double.infinity, height: 130),
+                Image.asset(
+                  'assets/sdu_logo.png',
+                  width: double.infinity,
+                  height: 130,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   context.localization.register,
@@ -126,53 +112,45 @@ class _RegisterPageState extends State<RegisterPage> {
                         fontWeight: FontWeight.bold,
                       ),
                 ),
-                const SizedBox(height: 24),
-                SegmentedButton<bool>(
-                  segments: [
-                    ButtonSegment(
-                      value: false,
-                      label: Text(context.localization.student),
-                      icon: const Icon(Icons.school_outlined),
-                    ),
-                    ButtonSegment(
-                      value: true,
-                      label: Text(context.localization.club),
-                      icon: const Icon(Icons.groups_outlined),
-                    ),
-                  ],
-                  selected: {_isClub},
-                  onSelectionChanged: (set) =>
-                      setState(() => _isClub = set.first),
-                ),
-                const SizedBox(height: 20),
-                if (_isClub)
-                  CustonTextField(
-                    controller: _clubNameCtrl,
-                    focusNode: _clubNameFocus,
-                    label: context.localization.clubNameLabel,
-                    icon: Icons.business_center_outlined,
-                    textInputType: TextInputType.text,
-                  )
-                else
-                  Column(
+                const SizedBox(height: 8),
+                // Подсказка: хочешь клуб? Подай заявку после входа.
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
                     children: [
-                      CustonTextField(
-                        controller: _firstNameCtrl,
-                        focusNode: _firstNameFocus,
-                        label: context.localization.firstName,
-                        icon: Icons.person_outlined,
-                        textInputType: TextInputType.name,
-                      ),
-                      const SizedBox(height: 12),
-                      CustonTextField(
-                        controller: _lastNameCtrl,
-                        focusNode: _lastNameFocus,
-                        label: context.localization.lastName,
-                        icon: Icons.person_outline,
-                        textInputType: TextInputType.name,
+                      const Icon(Icons.info_outline,
+                          color: Colors.blue, size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Хочешь создать клуб? Зарегистрируйся и подай заявку в настройках.',
+                          style: TextStyle(
+                              fontSize: 13, color: Colors.blue[800]),
+                        ),
                       ),
                     ],
                   ),
+                ),
+                const SizedBox(height: 20),
+                CustonTextField(
+                  controller: _firstNameCtrl,
+                  focusNode: _firstNameFocus,
+                  label: context.localization.firstName,
+                  icon: Icons.person_outlined,
+                  textInputType: TextInputType.name,
+                ),
+                const SizedBox(height: 12),
+                CustonTextField(
+                  controller: _lastNameCtrl,
+                  focusNode: _lastNameFocus,
+                  label: context.localization.lastName,
+                  icon: Icons.person_outline,
+                  textInputType: TextInputType.name,
+                ),
                 const SizedBox(height: 12),
                 CustonTextField(
                   controller: _emailCtrl,
@@ -185,7 +163,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 CustonTextField(
                   controller: _passCtrl,
                   focusNode: _passFocus,
-                  label: context.localization.password, // Minimum 8 characters logic is handled by validator/hint if needed
+                  label: context.localization.password,
                   icon: Icons.lock_outline,
                   textInputType: TextInputType.visiblePassword,
                   obscure: true,
@@ -205,12 +183,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                 child: CircularProgressIndicator(
                                     strokeWidth: 2, color: Colors.white),
                               )
-                            : Icon(_isClub ? Icons.groups : Icons.school),
-                        label: Text(
-                          _isClub
-                              ? context.localization.registerAsClub
-                              : context.localization.registerAsStudent,
-                        ),
+                            : const Icon(Icons.school),
+                        label: Text(context.localization.registerAsStudent),
                       ),
                     );
                   },

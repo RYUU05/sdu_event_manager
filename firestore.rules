@@ -1,0 +1,99 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Вспомогательные функции ────────────────────────────────────────────
+
+    // Проверка: пользователь залогинен
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    // Проверка: запрос идёт от владельца документа
+    function isOwner(userId) {
+      return isAuth() && request.auth.uid == userId;
+    }
+
+    // Роль из Firestore (читаем из documents, не из Custom Claims)
+    function userRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isSuperAdmin() {
+      return isAuth() && userRole() == 'super_admin';
+    }
+
+    // ─── users ────────────────────────────────────────────────────────────────
+
+    match /users/{userId} {
+      // Читать свой профиль может только владелец; super_admin — любой
+      allow read: if isOwner(userId) || isSuperAdmin();
+
+      // Создавать документ может только сам пользователь (при регистрации)
+      allow create: if isOwner(userId);
+
+      // Обновлять базовые поля (interests, name) может владелец
+      // НО поля role и managedClubId — только super_admin (через транзакцию)
+      allow update: if isOwner(userId)
+                    && !request.resource.data.diff(resource.data).affectedKeys()
+                        .hasAny(['role', 'managedClubId'])
+                    || isSuperAdmin();
+
+      allow delete: if false; // удаление аккаунта — через Admin SDK
+    }
+
+    // ─── clubs ────────────────────────────────────────────────────────────────
+
+    match /clubs/{clubId} {
+      // Читать клуб может любой
+      allow read: if true;
+
+      // Создавать клуб может только super_admin (через транзакцию approve)
+      allow create: if isSuperAdmin();
+
+      // Обновлять клуб может его владелец (club_admin) или super_admin
+      allow update: if isAuth()
+                    && (resource.data.ownerId == request.auth.uid
+                        || isSuperAdmin());
+
+      allow delete: if isSuperAdmin();
+    }
+
+    // ─── events ───────────────────────────────────────────────────────────────
+
+    match /events/{eventId} {
+      allow read: if true;
+
+      // Создавать события может club_admin (владелец клуба) или super_admin
+      allow create: if isAuth()
+                    && (userRole() == 'club_admin' || isSuperAdmin());
+
+      allow update, delete: if isAuth()
+                    && (resource.data.organizerId == request.auth.uid
+                        || isSuperAdmin());
+    }
+
+    // ─── club_applications ───────────────────────────────────────────────────
+
+    match /club_applications/{appId} {
+      // Читать свою заявку может студент; все заявки — super_admin
+      allow read: if isAuth()
+                  && (resource.data.userId == request.auth.uid
+                      || isSuperAdmin());
+
+      // Создавать заявку может любой залогиненный пользователь
+      allow create: if isAuth();
+
+      // Менять статус (approved/rejected) может ТОЛЬКО super_admin
+      // Студент может обновить только поле 'notified' (флаг уведомления)
+      allow update: if isSuperAdmin()
+                    || (isAuth()
+                        && resource.data.userId == request.auth.uid
+                        && request.resource.data.diff(resource.data)
+                            .affectedKeys().hasOnly(['notified']));
+
+      allow delete: if isSuperAdmin();
+    }
+  }
+}

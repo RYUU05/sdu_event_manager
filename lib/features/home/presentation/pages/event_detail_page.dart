@@ -63,7 +63,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
     // Check role via AuthBloc
     final authState = context.watch<AuthBloc>().state;
     final isStudent = authState is Authenticated && authState.user.role == UserRole.student;
-    final isClub = authState is Authenticated && authState.user.role == UserRole.club;
+    final isClub = authState is Authenticated && authState.user.role == UserRole.club_admin;
     final isLoggedIn = FirebaseAuth.instance.currentUser != null;
     
     // Show participate button strictly for students

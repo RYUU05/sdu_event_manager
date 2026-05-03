@@ -14,4 +14,8 @@ class ApiConfig {
     if (Platform.isAndroid) return 'http://10.0.2.2:8000';
     return 'http://127.0.0.1:8000';
   }
+
+  static String get syncApiKey {
+    return const String.fromEnvironment('SYNC_API_KEY', defaultValue: 'default_sync_key');
+  }
 }

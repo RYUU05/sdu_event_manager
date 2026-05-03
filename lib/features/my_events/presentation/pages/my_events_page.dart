@@ -25,7 +25,7 @@ class MyEventsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final authState = context.read<AuthBloc>().state;
     final bool isClub = authState is Authenticated &&
-        authState.user.role == UserRole.club;
+        authState.user.role == UserRole.club_admin;
     final String clubId =
         authState is Authenticated ? authState.user.id : '';
 

@@ -134,8 +134,15 @@ class _SettingsPageState extends State<SettingsPage> {
             }
             if (state is SettingsLoaded) {
               final authState = context.watch<AuthBloc>().state;
-              final showInterests = authState is Authenticated &&
-                  authState.user.role == UserRole.student;
+              final user =
+                  authState is Authenticated ? authState.user : null;
+              final showInterests =
+                  user != null && user.role == UserRole.student;
+              final isSuperAdmin =
+                  user != null && user.isSuperAdmin;
+              final isStudent =
+                  user != null && user.isStudent;
+
               return ListView(
                 children: [
                   ListTile(
@@ -151,10 +158,57 @@ class _SettingsPageState extends State<SettingsPage> {
                       child: Text(state.currentRole),
                     ),
                   ),
+
+                  // ── Студент: подать заявку на клуб ──────────────────────
+                  if (isStudent) ...[
+                    const Divider(),
+                    ListTile(
+                      leading: const Icon(
+                          Icons.groups_outlined,
+                          color: Colors.deepPurple),
+                      title: const Text('Создать клуб'),
+                      subtitle: const Text('Подать заявку на модерацию'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () =>
+                          context.router.push(const CreateClubApplicationRoute()),
+                    ),
+                    ListTile(
+                      leading: const Icon(
+                          Icons.assignment_outlined,
+                          color: Colors.blueGrey),
+                      title: const Text('Мои заявки'),
+                      subtitle: const Text('Статус поданных заявок'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () =>
+                          context.router.push(const MyApplicationsRoute()),
+                    ),
+                  ],
+
+                  // ── Супер-админ: панель модератора ───────────────────────
+                  if (isSuperAdmin) ...[
+                    const Divider(),
+                    ListTile(
+                      leading: const Icon(
+                          Icons.admin_panel_settings_outlined,
+                          color: Colors.orange),
+                      title: const Text(
+                        'Панель модератора',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orange),
+                      ),
+                      subtitle: const Text('Рассмотреть заявки на клубы'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () =>
+                          context.router.push(const AdminApplicationsRoute()),
+                    ),
+                  ],
+
                   if (showInterests) ...[
                     const Divider(),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -174,8 +228,9 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                           const SizedBox(height: 8),
                           FilledButton(
-                            onPressed:
-                                _savingInterests ? null : () => _saveInterests(context),
+                            onPressed: _savingInterests
+                                ? null
+                                : () => _saveInterests(context),
                             child: Text(context.localization.save),
                           ),
                         ],
@@ -187,8 +242,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     leading: const Icon(Icons.language),
                     title: Text(context.localization.language),
                     subtitle: Text(
-                      languageProvider.locale.languageCode == 'en' 
-                          ? 'English' 
+                      languageProvider.locale.languageCode == 'en'
+                          ? 'English'
                           : languageProvider.locale.languageCode == 'kk'
                               ? 'Қазақша'
                               : 'Русский',
@@ -205,7 +260,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     leading: const Icon(Icons.logout, color: Colors.red),
                     title: Text(
                       context.localization.logout,
-                      style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          color: Colors.red, fontWeight: FontWeight.bold),
                     ),
                     onTap: logout,
                   ),

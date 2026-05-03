@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../domain/entities/event.dart';
 import '../../domain/entities/club.dart';
 import '../../domain/repositories/home_repository.dart';
+import '../../../../core/di/injection.dart';
+import '../../../unibuddy/data/unibuddy_api.dart';
 import '../datasources/firebase_data_source.dart';
 
 class HomeRepositoryImpl implements HomeRepository {
@@ -89,5 +91,12 @@ class HomeRepositoryImpl implements HomeRepository {
     final userId = auth.currentUser?.uid;
     if (userId == null) throw Exception('Пользователь не авторизован');
     await dataSource.deleteEvent(eventId);
+    // Вызываем синхронизацию с Python-бэкендом
+    try {
+      await getIt<UniBuddyApi>().sync();
+    } catch (e) {
+      // Игнорируем ошибку синхронизации, чтобы не ломать UI
+      print('Ошибка при синхронизации с бэкендом: $e');
+    }
   }
 }

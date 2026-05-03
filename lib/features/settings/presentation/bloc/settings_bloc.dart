@@ -29,7 +29,11 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
       if (authState is Authenticated) {
         account = authState.user.name;
-        role = authState.user.role == UserRole.club ? 'Клуб' : 'Студент';
+        role = switch (authState.user.role) {
+          UserRole.super_admin => 'Супер-Админ',
+          UserRole.club_admin => 'Клуб-Админ',
+          UserRole.student => 'Студент',
+        };
       }
 
       // Always emit loaded — even if not authenticated

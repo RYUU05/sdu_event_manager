@@ -139,6 +139,19 @@ class UniBuddyApi {
     return RecommendResponse.fromJson(data);
   }
 
+  /// Вызывает синхронизацию RAG-базы на бэкенде.
+  /// Нужно вызывать при добавлении/удалении ивентов.
+  Future<void> sync() async {
+    await _dio.post<Map<String, dynamic>>(
+      '/sync',
+      options: Options(
+        headers: {
+          'x-api-key': ApiConfig.syncApiKey,
+        },
+      ),
+    );
+  }
+
   String humanMessage(Object error) {
     if (error is DioException) {
       if (error.type == DioExceptionType.connectionTimeout ||

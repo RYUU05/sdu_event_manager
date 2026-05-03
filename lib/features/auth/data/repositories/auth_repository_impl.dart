@@ -58,17 +58,15 @@ class AuthRepositoryImpl implements AuthRepository {
       }
 
       final doc = await _db.collection('users').doc(result.user!.uid).get();
-      final roleStr = doc.data()?['role'] ?? 'student';
-      final role = roleStr == 'club' ? UserRole.club : UserRole.student;
-
       final data = doc.data();
       return AuthSuccess(
         UserEntity(
           id: result.user!.uid,
           email: email,
           name: data?['name'] ?? email,
-          role: role,
+          role: UserEntity.roleFromString(data?['role'] as String?),
           interests: UserEntity.interestsFromFirestore(data?['interests']),
+          managedClubId: data?['managedClubId'] as String?,
         ),
       );
     } on FirebaseAuthException catch (e) {
@@ -105,36 +103,23 @@ class AuthRepositoryImpl implements AuthRepository {
       }
 
       final uid = result.user!.uid;
-      final roleStr = role == UserRole.club ? 'club' : 'student';
 
+      // Регистрация всегда создаёт студента.
+      // Стать club_admin можно только через заявку (одобряет super_admin).
       await _db.collection('users').doc(uid).set({
         'email': email,
         'name': name,
-        'role': roleStr,
+        'role': 'student',
         'interests': <String>[],
         'createdAt': FieldValue.serverTimestamp(),
       });
-
-      if (role == UserRole.club) {
-        await _db.collection('clubs').doc(uid).set({
-          'name': name,
-          'description': '',
-          'imageUrl': '',
-          'category': 'Клуб',
-          'memberCount': 0,
-          'rating': 0.0,
-          'tags': <String>[],
-          'ownerId': uid,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
-      }
 
       return AuthSuccess(
         UserEntity(
           id: uid,
           email: email,
           name: name,
-          role: role,
+          role: UserRole.student,
           interests: const [],
         ),
       );
@@ -166,16 +151,14 @@ class AuthRepositoryImpl implements AuthRepository {
 
     try {
       final doc = await _db.collection('users').doc(user.uid).get();
-      final roleStr = doc.data()?['role'] ?? 'student';
-      final role = roleStr == 'club' ? UserRole.club : UserRole.student;
-
       final data = doc.data();
       return UserEntity(
         id: user.uid,
         email: user.email ?? '',
         name: data?['name'] ?? user.email ?? '',
-        role: role,
+        role: UserEntity.roleFromString(data?['role'] as String?),
         interests: UserEntity.interestsFromFirestore(data?['interests']),
+        managedClubId: data?['managedClubId'] as String?,
       );
     } catch (e) {
       return null;
@@ -189,16 +172,14 @@ class AuthRepositoryImpl implements AuthRepository {
 
       try {
         final doc = await _db.collection('users').doc(user.uid).get();
-        final roleStr = doc.data()?['role'] ?? 'student';
-        final role = roleStr == 'club' ? UserRole.club : UserRole.student;
-
         final data = doc.data();
         return UserEntity(
           id: user.uid,
           email: user.email ?? '',
           name: data?['name'] ?? user.email ?? '',
-          role: role,
+          role: UserEntity.roleFromString(data?['role'] as String?),
           interests: UserEntity.interestsFromFirestore(data?['interests']),
+          managedClubId: data?['managedClubId'] as String?,
         );
       } catch (e) {
         return null;

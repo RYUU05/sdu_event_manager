@@ -10,6 +10,8 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:event_manager/features/home/domain/entities/event.dart';
+import '../../../../core/di/injection.dart';
+import '../../../unibuddy/data/unibuddy_api.dart';
 
 @RoutePage(name: 'CreateEventRoute')
 class CreateEventPage extends StatefulWidget {
@@ -231,6 +233,14 @@ class _CreateEventPageState extends State<CreateEventPage> {
           context.router.maybePop();
         }
       }
+
+      // Вызываем синхронизацию с Python-бэкендом
+      try {
+        await getIt<UniBuddyApi>().sync();
+      } catch (e) {
+        print('Ошибка синхронизации: $e');
+      }
+
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -251,7 +261,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
       ),
       body: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
-          if (state is! Authenticated || state.user.role != UserRole.club) {
+          if (state is! Authenticated || state.user.role != UserRole.club_admin) {
             return Center(
               child: Text(context.localization.onlyClubsCreate),
             );
