@@ -1,44 +1,92 @@
-import 'package:flutter/foundation.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+import '../../domain/auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  AuthRepositoryImpl({
+    FirebaseAuth? auth,
+    FirebaseFirestore? db,
+  })  : _auth = auth ?? FirebaseAuth.instance,
+        _db = db ?? FirebaseFirestore.instance;
+
+  final FirebaseAuth _auth;
+  final FirebaseFirestore _db;
+
+  static String _mapAuthException(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'user-not-found':
+        return 'Пользователь не найден';
+      case 'wrong-password':
+        return 'Неверный пароль';
+      case 'invalid-email':
+        return 'Некорректный email';
+      case 'user-disabled':
+        return 'Аккаунт заблокирован';
+      case 'too-many-requests':
+        return 'Слишком много попыток. Попробуйте позже';
+      case 'invalid-credential':
+      case 'invalid-login-credentials':
+        return 'Неверный email или пароль';
+      case 'email-already-in-use':
+        return 'Этот email уже зарегистрирован';
+      case 'weak-password':
+        return 'Слишком слабый пароль';
+      case 'operation-not-allowed':
+        return 'Этот способ входа отключён';
+      case 'network-request-failed':
+        return 'Нет соединения с сетью';
+      default:
+        return e.message?.isNotEmpty == true
+            ? e.message!
+            : 'Ошибка авторизации (${e.code})';
+    }
+  }
 
   @override
-  Future<UserEntity?> login(String email, String password) async {
+  Future<AuthResult> login(String email, String password) async {
     try {
       final result = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      if (result.user == null) return null;
+      if (result.user == null) {
+        return const AuthFailure('Не удалось войти');
+      }
 
       final doc = await _db.collection('users').doc(result.user!.uid).get();
       final roleStr = doc.data()?['role'] ?? 'student';
       final role = roleStr == 'club' ? UserRole.club : UserRole.student;
 
-      return UserEntity(
-        id: result.user!.uid,
-        email: email,
-        name: doc.data()?['name'] ?? email,
-        role: role,
+      return AuthSuccess(
+        UserEntity(
+          id: result.user!.uid,
+          email: email,
+          name: doc.data()?['name'] ?? email,
+          role: role,
+        ),
       );
     } on FirebaseAuthException catch (e) {
       debugPrint('Login error: ${e.code} - ${e.message}');
-      return null;
+      return AuthFailure(_mapAuthException(e));
+    } on FirebaseException catch (e) {
+      debugPrint('Login Firestore error: ${e.code} - ${e.message}');
+      return AuthFailure(
+        e.message?.isNotEmpty == true
+            ? e.message!
+            : 'Ошибка при загрузке профиля',
+      );
     } catch (e) {
       debugPrint('Login error: $e');
-      return null;
+      return const AuthFailure('Ошибка сети. Проверьте подключение');
     }
   }
 
   @override
-  Future<UserEntity?> register(
+  Future<AuthResult> register(
     String email,
     String password,
     String name,
@@ -50,12 +98,13 @@ class AuthRepositoryImpl implements AuthRepository {
         password: password,
       );
 
-      if (result.user == null) return null;
+      if (result.user == null) {
+        return const AuthFailure('Не удалось создать аккаунт');
+      }
 
       final uid = result.user!.uid;
       final roleStr = role == UserRole.club ? 'club' : 'student';
 
-      // Always create user doc
       await _db.collection('users').doc(uid).set({
         'email': email,
         'name': name,
@@ -63,7 +112,6 @@ class AuthRepositoryImpl implements AuthRepository {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      // If club — also create entry in clubs collection
       if (role == UserRole.club) {
         await _db.collection('clubs').doc(uid).set({
           'name': name,
@@ -78,15 +126,27 @@ class AuthRepositoryImpl implements AuthRepository {
         });
       }
 
-      return UserEntity(
-        id: uid,
-        email: email,
-        name: name,
-        role: role,
+      return AuthSuccess(
+        UserEntity(
+          id: uid,
+          email: email,
+          name: name,
+          role: role,
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      debugPrint('Register error: ${e.code} - ${e.message}');
+      return AuthFailure(_mapAuthException(e));
+    } on FirebaseException catch (e) {
+      debugPrint('Register Firestore error: ${e.code} - ${e.message}');
+      return AuthFailure(
+        e.message?.isNotEmpty == true
+            ? e.message!
+            : 'Ошибка при сохранении профиля',
       );
     } catch (e) {
       debugPrint('Register error: $e');
-      return null;
+      return const AuthFailure('Ошибка сети. Проверьте подключение');
     }
   }
 

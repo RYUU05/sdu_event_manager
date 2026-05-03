@@ -16,6 +16,7 @@ import '../../features/settings/domain/repositories/settings_repository.dart';
 import '../../features/settings/presentation/bloc/settings_bloc.dart';
 
 final getIt = GetIt.instance;
+final sl = getIt;
 
 void configureDependencies() {
   // 1. Firebase Instances
@@ -32,7 +33,10 @@ void configureDependencies() {
 
   // 3. Repositories
   getIt.registerLazySingleton<AuthRepository>(
-      () => AuthRepositoryImpl());
+      () => AuthRepositoryImpl(
+            auth: getIt<FirebaseAuth>(),
+            db: getIt<FirebaseFirestore>(),
+          ));
 
   getIt.registerLazySingleton<HomeRepository>(() => HomeRepositoryImpl(
         dataSource: getIt<FirebaseDataSource>(),

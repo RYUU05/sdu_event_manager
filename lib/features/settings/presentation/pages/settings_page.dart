@@ -22,7 +22,8 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    settingsBloc = getIt<SettingsBloc>();
+    // Используем getIt из injection.dart
+    settingsBloc = sl<SettingsBloc>(); 
     settingsBloc.add(LoadSettingsEvent());
   }
 
@@ -37,11 +38,7 @@ class _SettingsPageState extends State<SettingsPage> {
     context.router.replace(const LoginRoute());
   }
 
-  void _showLanguageDialog(
-    BuildContext context,
-    LanguageProvider provider,
-    String currentLang,
-  ) {
+  void _showLanguageDialog(BuildContext context, LanguageProvider provider, String currentLang) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -66,7 +63,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 settingsBloc.add(LanguageEvent('ru'));
                 Navigator.pop(ctx);
               },
-            ),
+            ), // <-- Проверь, чтобы тут была эта запятая и скобка
             ListTile(
               title: const Text('Қазақша'),
               trailing: currentLang == 'kk' ? const Icon(Icons.check) : null,
@@ -86,8 +83,8 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     final languageProvider = context.watch<LanguageProvider>();
 
-    return BlocProvider(
-      create: (_) => settingsBloc,
+    return BlocProvider.value( // Используем .value, так как блок уже создан
+      value: settingsBloc,
       child: Scaffold(
         appBar: AppBar(title: Text(context.localization.settings)),
         body: BlocBuilder<SettingsBloc, SettingsState>(
@@ -105,7 +102,14 @@ class _SettingsPageState extends State<SettingsPage> {
                     leading: const Icon(Icons.account_circle_rounded),
                     title: Text(context.localization.account),
                     subtitle: Text(state.currentUser),
-                    trailing: Text(state.currentRole),
+                    trailing: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(state.currentRole),
+                    ),
                   ),
                   const Divider(),
                   ListTile(
@@ -130,7 +134,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     leading: const Icon(Icons.logout, color: Colors.red),
                     title: Text(
                       context.localization.logout,
-                      style: TextStyle(color: Colors.red),
+                      style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                     ),
                     onTap: logout,
                   ),

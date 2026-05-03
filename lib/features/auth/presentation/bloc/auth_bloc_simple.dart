@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:event_manager/features/auth/domain/auth_result.dart';
 import 'package:event_manager/features/auth/domain/entities/user_entity.dart';
 import 'package:event_manager/features/auth/domain/repositories/auth_repository.dart';
 
@@ -73,11 +74,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onLogin(LoginRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    final user = await _repo.login(event.email, event.password);
-    if (user != null) {
-      emit(Authenticated(user));
-    } else {
-      emit(AuthError('Неверный email или пароль'));
+    final result = await _repo.login(event.email, event.password);
+    switch (result) {
+      case AuthSuccess(:final user):
+        emit(Authenticated(user));
+      case AuthFailure(:final message):
+        emit(AuthError(message));
     }
   }
 
@@ -86,16 +88,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
-    final user = await _repo.register(
+    final result = await _repo.register(
       event.email,
       event.password,
       event.name,
       event.role,
     );
-    if (user != null) {
-      emit(Authenticated(user));
-    } else {
-      emit(AuthError('Ошибка регистрации. Проверьте данные.'));
+    switch (result) {
+      case AuthSuccess(:final user):
+        emit(Authenticated(user));
+      case AuthFailure(:final message):
+        emit(AuthError(message));
     }
   }
 
