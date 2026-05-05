@@ -15,22 +15,16 @@ import 'l10n/app_localizations.dart';
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  
-  // Загружаем переменные окружения
+
   await dotenv.load(fileName: ".env");
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   configureDependencies();
   FlutterNativeSplash.remove();
   runApp(const MyApp());
 }
 
 final _router = AppRouter();
-
-// Используем navigatorKey из сервиса уведомлений —
-// это позволяет показывать Dialog без BuildContext
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -39,15 +33,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => LanguageProvider()..init(),
-        ),
+        ChangeNotifierProvider(create: (_) => LanguageProvider()..init()),
       ],
       child: BlocProvider.value(
         value: getIt<AuthBloc>(),
         child: BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
-            // Запускаем/останавливаем слушатель уведомлений при смене auth-состояния
             if (state is Authenticated) {
               InAppNotificationService.instance.init(state.user.id);
             } else if (state is Unauthenticated) {
@@ -62,13 +53,12 @@ class MyApp extends StatelessWidget {
                 locale: languageProvider.locale,
                 title: 'SDU Events',
                 debugShowCheckedModeBanner: false,
-                // Передаём navigatorKey для показа диалогов через сервис
-                routerConfig: _router.config(
-                  navigatorObservers: () => [],
-                ),
+
+                routerConfig: _router.config(navigatorObservers: () => []),
                 theme: ThemeData(
-                  colorScheme:
-                      ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+                  colorScheme: ColorScheme.fromSeed(
+                    seedColor: Colors.deepPurple,
+                  ),
                   useMaterial3: true,
                 ),
               );
