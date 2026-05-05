@@ -1,6 +1,6 @@
 // Три роли: обычный студент, администратор клуба (после одобрения заявки),
 // и суперадмин SDULife (проставляется вручную в Firestore Console).
-enum UserRole { student, club_admin, super_admin }
+enum UserRole { student, clubAdmin, superAdmin }
 
 class UserEntity {
   final String id;
@@ -42,9 +42,9 @@ class UserEntity {
   static UserRole roleFromString(String? raw) {
     switch (raw) {
       case 'club_admin':
-        return UserRole.club_admin;
+        return UserRole.clubAdmin;
       case 'super_admin':
-        return UserRole.super_admin;
+        return UserRole.superAdmin;
       default:
         return UserRole.student;
     }
@@ -52,9 +52,9 @@ class UserEntity {
 
   static String roleToString(UserRole role) {
     switch (role) {
-      case UserRole.club_admin:
+      case UserRole.clubAdmin:
         return 'club_admin';
-      case UserRole.super_admin:
+      case UserRole.superAdmin:
         return 'super_admin';
       case UserRole.student:
         return 'student';
@@ -120,12 +120,12 @@ class UserEntity {
 
 extension UserPermissions on UserEntity {
   bool get isStudent => role == UserRole.student;
-  bool get isClubAdmin => role == UserRole.club_admin;
-  bool get isSuperAdmin => role == UserRole.super_admin;
+  bool get isClubAdmin => role == UserRole.clubAdmin;
+  bool get isSuperAdmin => role == UserRole.superAdmin;
 
   /// Создавать события может только club_admin
-  bool get canCreateEvent => role == UserRole.club_admin;
+  bool get canCreateEvent => role == UserRole.clubAdmin;
 
   /// Видеть панель модератора
-  bool get canModerate => role == UserRole.super_admin;
+  bool get canModerate => role == UserRole.superAdmin;
 }

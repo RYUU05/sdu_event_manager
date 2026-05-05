@@ -30,8 +30,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       if (authState is Authenticated) {
         account = authState.user.name;
         role = switch (authState.user.role) {
-          UserRole.super_admin => 'Супер-Админ',
-          UserRole.club_admin => 'Клуб-Админ',
+          UserRole.superAdmin => 'Супер-Админ',
+          UserRole.clubAdmin => 'Клуб-Админ',
           UserRole.student => 'Студент',
         };
       }

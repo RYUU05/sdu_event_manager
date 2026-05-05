@@ -153,7 +153,7 @@ class _HomePageState extends State<HomePage> {
         floatingActionButton: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, authState) {
             if (authState is Authenticated &&
-                authState.user.role == UserRole.club_admin) {
+                authState.user.role == UserRole.clubAdmin) {
               return FloatingActionButton.extended(
                 onPressed: () =>
                     context.router.push(CreateEventRoute()),

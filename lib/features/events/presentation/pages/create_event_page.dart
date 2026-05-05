@@ -261,7 +261,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
       ),
       body: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
-          if (state is! Authenticated || state.user.role != UserRole.club_admin) {
+          if (state is! Authenticated || state.user.role != UserRole.clubAdmin) {
             return Center(
               child: Text(context.localization.onlyClubsCreate),
             );

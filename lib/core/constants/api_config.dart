@@ -1,7 +1,4 @@
-import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
-import 'package:flutter/foundation.dart';
 
 /// Базовый URL FastAPI UniBuddy.
 /// Переопределение: `--dart-define=API_BASE_URL=http://192.168.x.x:8000`

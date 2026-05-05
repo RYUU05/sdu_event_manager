@@ -137,7 +137,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Banner Selection
-                  if (user.role == UserRole.club_admin) ...[
+                  if (user.role == UserRole.clubAdmin) ...[
                     Text(context.localization.banner, style: const TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     GestureDetector(
@@ -200,7 +200,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   const SizedBox(height: 16),
 
                   // Description (Clubs only)
-                  if (user.role == UserRole.club_admin) ...[
+                  if (user.role == UserRole.clubAdmin) ...[
                     TextFormField(
                       controller: _descCtrl,
                       maxLines: 4,
