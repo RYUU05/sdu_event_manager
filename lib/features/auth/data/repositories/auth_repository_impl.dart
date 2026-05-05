@@ -240,16 +240,19 @@ class AuthRepositoryImpl implements AuthRepository {
     final userDoc = await _db.collection('users').doc(user.uid).get();
     final data = userDoc.data();
     if (data != null && data['role'] == 'club_admin') {
-      final clubUpdates = <String, dynamic>{};
-      if (name != null) clubUpdates['name'] = name;
-      if (description != null) clubUpdates['description'] = description;
-      if (avatarUrl != null) clubUpdates['imageUrl'] = avatarUrl;
+      final clubId = data['managedClubId'] as String?;
+      if (clubId != null) {
+        final clubUpdates = <String, dynamic>{};
+        if (name != null) clubUpdates['name'] = name;
+        if (description != null) clubUpdates['description'] = description;
+        if (avatarUrl != null) clubUpdates['imageUrl'] = avatarUrl;
 
-      if (clubUpdates.isNotEmpty) {
-        await _db.collection('clubs').doc(user.uid).set(
-              clubUpdates,
-              SetOptions(merge: true),
-            );
+        if (clubUpdates.isNotEmpty) {
+          await _db.collection('clubs').doc(clubId).set(
+                clubUpdates,
+                SetOptions(merge: true),
+              );
+        }
       }
     }
 

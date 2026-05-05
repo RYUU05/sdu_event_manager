@@ -1,16 +1,79 @@
-# event_manager
+# 🎓 SDU Event Manager
 
-A new Flutter project.
+A high-performance, cross-platform mobile application designed for SDU students and clubs. This app simplifies campus life by centralizing event discovery, club management, and AI-powered assistance.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+### 🚀 Features
 
-A few resources to get you started if this is your first Flutter project:
+*   **Smart Event Feed** – Discover academic, sports, and cultural events with personalized recommendations.
+*   **Club Management** – Clubs can create events, manage posters, and track participant counts.
+*   **UniBuddy (AI Chat)** – An integrated AI assistant to help students with campus-related questions.
+*   **Role-Based Access** – Dynamic UI for Students, Club Admins, and Super Admins.
+*   **Multilingual Support** – Switch seamlessly between English, Kazakh, and Russian.
+*   **Modern Profile** – Customizable user profiles with avatars, banners, and interest tags.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### 🧠 Architecture
+
+This project is built using **Clean Architecture** principles to ensure the code is testable, scalable, and easy to maintain.
+
+**State Management:** [BLoC (Business Logic Component)](https://pub.dev/packages/flutter_bloc)
+
+**Flow:**
+`UI ➔ Event ➔ BLoC ➔ Repository ➔ Data Source (Firebase/API) ➔ State ➔ UI`
+
+---
+
+### 🛠 Tech Stack
+
+*   **Frontend:** [Flutter](https://flutter.dev) & [Dart](https://dart.dev)
+*   **Backend:** [Firebase](https://firebase.google.com) (Auth, Firestore, Storage)
+*   **AI Backend:** [FastAPI](https://fastapi.tiangolo.com) (UniBuddy Integration)
+*   **Navigation:** [AutoRoute](https://pub.dev/packages/auto_route)
+*   **Dependency Injection:** [GetIt](https://pub.dev/packages/get_it)
+
+---
+
+### 📦 Project Structure
+
+```text
+lib/
+├── core/             # Design system, constants, and DI
+├── features/         # Feature-first structure
+│   ├── auth/         # Login & Registration
+│   ├── events/       # Event creation & Participation
+│   ├── home/         # Main feed & UniBuddy
+│   ├── settings/     # Profile & Preferences
+│   └── applications/ # Club approval logic
+└── l10n/             # Multilingual ARB files
+
+
+### 📦 Screenshots
+
+![Screenshot 1](/screenshots/1.png)
+![Screenshot 2](/screenshots/2.png)
+![Screenshot 3](/screenshots/3.png)
+![Screenshot 4](/screenshots/4.png)
+![Screenshot 5](/screenshots/5.png)
+![Screenshot 6](/screenshots/6.png)
+![Screenshot 7](/screenshots/7.png)
+![Screenshot 8](/screenshots/8.png)
+![Screenshot 9](/screenshots/9.png)
+
+### ⚙️ How to Run
+Clone the project:
+
+git clone https://github.com/RYUU05/sdu_event_manager.git
+cd sdu_event_manager
+
+Install dependencies:
+
+flutter pub get
+
+Generate code (Routes & DI):
+
+flutter run
+
+

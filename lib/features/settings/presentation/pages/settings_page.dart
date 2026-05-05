@@ -146,7 +146,14 @@ class _SettingsPageState extends State<SettingsPage> {
               return ListView(
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.account_circle_rounded),
+                    leading: CircleAvatar(
+                      backgroundImage: user?.avatarUrl.isNotEmpty == true
+                          ? NetworkImage(user!.avatarUrl)
+                          : null,
+                      child: (user?.avatarUrl == null || user!.avatarUrl.isEmpty)
+                          ? const Icon(Icons.account_circle_rounded)
+                          : null,
+                    ),
                     title: Text(context.localization.account),
                     subtitle: Text(state.currentUser),
                     trailing: Container(
